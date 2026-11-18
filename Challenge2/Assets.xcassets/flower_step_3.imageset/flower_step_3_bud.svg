@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="cuteStem" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#76C868"/>
+      <stop offset="100%" stop-color="#A8E888"/>
+    </linearGradient>
+    <linearGradient id="cuteLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C8F79A"/>
+      <stop offset="100%" stop-color="#84D472"/>
+    </linearGradient>
+  </defs>
+  <g id="cute-soil">
+    <ellipse cx="256" cy="404" rx="96" ry="22" fill="#4A7C32" opacity="0.22"/>
+    <path d="M164 394 C164 358, 348 358, 348 394 C348 418, 164 418, 164 394 Z" fill="#9E6542" stroke="#4A3222" stroke-width="5.5" stroke-linejoin="round"/>
+    <path d="M182 382 C206 366, 306 366, 330 382" fill="none" stroke="#C68963" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="210" cy="396" r="7" fill="#7D4C2F" stroke="#4A3222" stroke-width="2.5"/>
+    <circle cx="300" cy="397" r="9" fill="#7D4C2F" stroke="#4A3222" stroke-width="2.5"/>
+  </g>
+  <g id="plant-body">
+    <path d="M256 384 Q242 280 256 174" stroke="#4A3222" stroke-width="15" stroke-linecap="round" fill="none"/>
+    <path d="M256 384 Q242 280 256 174" stroke="url(#cuteStem)" stroke-width="9.5" stroke-linecap="round" fill="none"/>
+    <path d="M248 332 C188 274, 124 290, 132 336 C140 374, 210 368, 248 332 Z" fill="url(#cuteLeaf)" stroke="#4A3222" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M243 333 Q192 315, 150 331" stroke="#5AA34B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M253 282 C314 222, 380 238, 372 286 C364 326, 292 320, 253 282 Z" fill="url(#cuteLeaf)" stroke="#4A3222" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M258 283 Q310 265, 354 281" stroke="#5AA34B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </g>
+  <g id="bud-stage-3" transform="translate(256, 162)">
+    <!-- Inner tightly closed fresh green/cream-green bud -->
+    <path d="M0 -54 C-28 -32, -30 8, 0 18 C30 8, 28 -32, 0 -54 Z" fill="#C8F79A" stroke="#4A3222" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M-7 -38 C-16 -22, -16 -4, -5 8" stroke="#E8FFD1" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <!-- Overlapping outer green sepals wrapping the bud -->
+    <path d="M0 22 C-34 20, -40 -14, -18 -32 C-12 -12, -5 4, 0 10 Z" fill="#84D472" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round"/>
+    <path d="M0 22 C34 20, 40 -14, 18 -32 C12 -12, 5 4, 0 10 Z" fill="#A8E888" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round"/>
+    <path d="M0 22 C-14 6, -12 -18, 0 -36 C12 -18, 14 6, 0 22 Z" fill="#95E07A" stroke="#4A3222" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+</svg>
