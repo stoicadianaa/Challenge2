@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="cuteStem" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#76C868"/>
+      <stop offset="100%" stop-color="#A8E888"/>
+    </linearGradient>
+    <linearGradient id="cuteLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C8F79A"/>
+      <stop offset="100%" stop-color="#84D472"/>
+    </linearGradient>
+  </defs>
+  <g id="cute-soil">
+    <ellipse cx="256" cy="404" rx="96" ry="22" fill="#4A7C32" opacity="0.22"/>
+    <path d="M164 394 C164 358, 348 358, 348 394 C348 418, 164 418, 164 394 Z" fill="#9E6542" stroke="#4A3222" stroke-width="5.5" stroke-linejoin="round"/>
+    <path d="M182 382 C206 366, 306 366, 330 382" fill="none" stroke="#C68963" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="210" cy="396" r="7" fill="#7D4C2F" stroke="#4A3222" stroke-width="2.5"/>
+    <circle cx="300" cy="397" r="9" fill="#7D4C2F" stroke="#4A3222" stroke-width="2.5"/>
+  </g>
+  <g id="plant-body">
+    <path d="M256 384 Q242 280 256 174" stroke="#4A3222" stroke-width="15" stroke-linecap="round" fill="none"/>
+    <path d="M256 384 Q242 280 256 174" stroke="url(#cuteStem)" stroke-width="9.5" stroke-linecap="round" fill="none"/>
+    <path d="M248 332 C188 274, 124 290, 132 336 C140 374, 210 368, 248 332 Z" fill="url(#cuteLeaf)" stroke="#4A3222" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M243 333 Q192 315, 150 331" stroke="#5AA34B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <path d="M253 282 C314 222, 380 238, 372 286 C364 326, 292 320, 253 282 Z" fill="url(#cuteLeaf)" stroke="#4A3222" stroke-width="4.5" stroke-linejoin="round"/>
+    <path d="M258 283 Q310 265, 354 281" stroke="#5AA34B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  </g>
+  <g transform="translate(256, 162)">
+    <path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(0)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(30)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(60)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(90)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(120)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(150)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(180)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(210)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(240)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(270)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(300)"/><path d="M0 0 C-16 -30, -18 -74, 0 -90 C18 -74, 16 -30, 0 0 Z" fill="#FFFDF9" stroke="#4A3222" stroke-width="4.2" stroke-linejoin="round" transform="rotate(330)"/>
+  </g>
+  <g transform="translate(256, 162)">
+    <circle cx="0" cy="0" r="26" fill="#FFE28A" stroke="#4A3222" stroke-width="4.5"/>
+    <circle cx="0" cy="0" r="15" fill="#F6C85F"/>
+    <circle cx="-9" cy="-4" r="3.5" fill="#4A3222"/>
+    <circle cx="9" cy="-4" r="3.5" fill="#4A3222"/>
+    <circle cx="-10.5" cy="-6" r="1.4" fill="#FFFFFF"/>
+    <circle cx="7.5" cy="-6" r="1.4" fill="#FFFFFF"/>
+    <path d="M-5 4 Q0 9 5 4" fill="none" stroke="#4A3222" stroke-width="2.8" stroke-linecap="round"/>
+    <circle cx="-15" cy="2" r="4.5" fill="#FF9EBB" opacity="0.75"/>
+    <circle cx="15" cy="2" r="4.5" fill="#FF9EBB" opacity="0.75"/>
+  </g>
+</svg>
