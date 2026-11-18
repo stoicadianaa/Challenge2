@@ -10,10 +10,6 @@ import SwiftUI
 struct HomeView: View {
     @State private var waterDropsCount = 0
     
-    private let gridColumns = [
-        GridItem(.adaptive(minimum: 200), spacing: 20)
-    ]
-    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -30,7 +26,7 @@ struct HomeView: View {
                 
                 Spacer()
                 
-                LazyVGrid(columns: gridColumns, spacing: 20) {
+                HStack(spacing: 20) {
                     CategoryCard(
                         title: "Words",
                         mainSymbolText: "Aa",
@@ -57,7 +53,9 @@ struct HomeView: View {
                         cardColor: Color(red: 0.95, green: 0.5, blue: 0.45)
                     ) {}
                 }
-                .padding(.horizontal, 30)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 10)            
+                .background(Color.clear)
                 
                 Spacer()
             }
