@@ -60,6 +60,7 @@ struct HomeView: View {
                 Spacer()
             }
             .padding()
+            
             .background(
                 Image("background")
                     .resizable()
