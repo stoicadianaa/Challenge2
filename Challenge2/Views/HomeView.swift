@@ -8,10 +8,15 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var waterDropsCount = 0
+    
+    @State private var gardenViewModel = GardenViewModel()
+
+    @AppStorage("waterDrops") private var waterDropsCount = 0
     
     var body: some View {
+        
         NavigationStack {
+            
             VStack(spacing: 16) {
 
                 Spacer()
@@ -60,6 +65,7 @@ struct HomeView: View {
                 Spacer()
             }
             .padding()
+            
             .background(
                 Image("background")
                     .resizable()
@@ -68,7 +74,9 @@ struct HomeView: View {
             )
 
             .navigationBarTitleDisplayMode(.inline)
+            
             .toolbar {
+                
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                     } label: {
