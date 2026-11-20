@@ -9,7 +9,15 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var waterDropsCount = 0
-    
+
+    // The category being played; nil means we're on the home screen.
+    private let viewModel = GameViewModel()
+    @State private var selectedType: GameType?
+
+    private func play(_ type: GameType) {
+        if !viewModel.games(for: type).isEmpty { selectedType = type }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -35,19 +43,19 @@ struct HomeView: View {
                         title: "Words",
                         emoji: "🔡",
                         cardColor: Color(red: 0.35, green: 0.6, blue: 0.9)
-                    ) {}
+                    ) { play(.words) }
                     
                     CategoryCard(
                         title: "Numbers",
                         emoji: "🧠",
                         cardColor: Color(red: 0.45, green: 0.75, blue: 0.3)
-                    ) {}
+                    ) { play(.math) }
                     
                     CategoryCard(
                         title: "Logic",
                         emoji: "🧩",
                         cardColor: Color(red: 0.98, green: 0.72, blue: 0.3)
-                    ) {}
+                    ) { play(.ordering) }
                     
                     CategoryCard(
                         title: "Creativity",
@@ -70,6 +78,15 @@ struct HomeView: View {
                     .scaledToFill()
                     .ignoresSafeArea()
             )
+
+            // Pushes the session while selectedType is set; going back resets it to nil.
+            .navigationDestination(item: $selectedType) { type in
+                // Plays 1 game by default; pass `gameCount:` for longer sessions.
+                // Each game played earns 1 drop.
+                GameSessionView(games: viewModel.games(for: type)) { drops in
+                    waterDropsCount += drops
+                }
+            }
 
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

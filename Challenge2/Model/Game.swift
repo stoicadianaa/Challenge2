@@ -6,3 +6,19 @@
 //
 
 import Foundation
+
+struct Game: Identifiable {
+    let id = UUID()
+    let difficulty: Difficulty
+    let content: GameContent
+
+    var type: GameType {
+        switch content {
+        case .ordering: .ordering
+        }
+    }
+}
+
+enum GameContent {
+    case ordering(OrderingGameModel)
+}

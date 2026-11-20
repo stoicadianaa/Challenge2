@@ -5,11 +5,14 @@
 //  Created by Diana Cristina Stoica on 18/11/2026.
 //
 
-import SwiftUI
+import SwiftUI 
 
 struct OrderingGame: View {
     @State var game: OrderingGameModel
     @State private var checkResult: Bool? = nil
+
+    // Called when the order is correct. The session decides what happens next.
+    let onCorrect: () -> Void
 
     var body: some View {
         VStack {
@@ -70,10 +73,21 @@ struct OrderingGame: View {
         .onAppear {
             game.shuffle()
         }
+        // On a correct answer, wait 1.5s so the child sees "Correct!", then continue.
+        // Unlike a plain Task, .task is cancelled if the view goes away, so a game
+        // the child left can't still finish and award drops.
+        .task(id: checkResult) {
+            guard checkResult == true else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            guard !Task.isCancelled else { return }
+            onCorrect()
+        }
     }
 }
 
 #Preview {
-    let game: OrderingGameModel = OrderingGameViewModel().games.first!
-    OrderingGame(game: game)
+    let game = GameViewModel().games(type: .ordering, difficulty: .easy).first!
+    if case .ordering(let model) = game.content {
+        OrderingGame(game: model, onCorrect: {})
+    }
 }
