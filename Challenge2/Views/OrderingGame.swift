@@ -74,6 +74,6 @@ struct OrderingGame: View {
 }
 
 #Preview {
-    var game: OrderingGameModel = OrderingGameViewModel().games.first!
+    let game: OrderingGameModel = OrderingGameViewModel().games.first!
     OrderingGame(game: game)
 }

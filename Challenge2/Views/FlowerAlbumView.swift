@@ -2,247 +2,94 @@ import SwiftUI
 
 struct FlowerAlbumView: View {
     @Environment(FlowerAlbumViewModel.self) private var viewModel
-    @Environment(\.dismiss) private var dismiss
 
-    @State private var measuredCardHeight: CGFloat = 180
+    // Always 5 cards per row, so the cards are smaller than with an adaptive grid.
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 5)
 
-    private let spacing: CGFloat = 16
-    private let sidePadding: CGFloat = 32
+    // TEMPORARY: only for previewing how the screen looks when it is filled.
+    // Remove once the view model has enough real flowers.
+    private let placeholderTotal = 30
 
-    // Minimum number of album spaces: 6 rows of 5.
-    private let albumCapacity = 30
-
-    private let upcomingFlowerAssets = [
-        "flower_bluebell",
-        "flower_forgetmenot",
-        "flower_sakura",
-        "flower_mint_lotus",
-        "flower_apricot_hibiscus",
-        "flower_wildrose",
-        "flower_poppy",
-        "flower_tulip",
-        "flower_daisy",
-        "flower_sunflower",
-        "flower_lilac_cosmos",
-        "flower_pink_blossom",
-        "flower_buttercup"
-    ]
-
-    private var extraSlotCount: Int {
-        max(0, albumCapacity - viewModel.flowers.count)
-    }
-
-    private var columns: [GridItem] {
-        Array(
-            repeating: GridItem(
-                .flexible(minimum: 0),
-                spacing: spacing
-            ),
-            count: 5
-        )
+    private var placeholderCount: Int {
+        guard !viewModel.flowers.isEmpty else { return 0 }
+        return max(0, placeholderTotal - viewModel.flowers.count)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            albumHeader
-
-            ScrollView(.vertical) {
-                LazyVGrid(columns: columns, spacing: spacing) {
-
-                    // Original cards: no extra background or shadow.
+        ScrollView {
+            VStack(spacing: 24) {
+                LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.flowers) { flower in
                         FlowerCardView(flower: flower)
-                            .onGeometryChange(for: CGFloat.self) { geometry in
-                                geometry.size.height
-                            } action: { height in
-                                if height > 0,
-                                   abs(measuredCardHeight - height) > 0.5 {
-                                    measuredCardHeight = height
-                                }
-                            }
                     }
 
-                    // Additional locked spaces continue below the screen.
-                    ForEach(0..<extraSlotCount, id: \.self) { index in
-                        AlbumUpcomingFlowerCard(
-                            imageName: upcomingFlowerAssets[
-                                index % upcomingFlowerAssets.count
-                            ],
-                            height: measuredCardHeight
+                    // TEMPORARY: extra locked cards, just to see how the screen looks filled.
+                    // They reuse the real flowers' images and are not part of the data.
+                    ForEach(0..<placeholderCount, id: \.self) { index in
+                        let source = viewModel.flowers[index % viewModel.flowers.count]
+                        FlowerCardView(
+                            flower: Flower(
+                                imageName: source.imageName,
+                                name: "Placeholder",
+                                isUnlocked: false
+                            )
                         )
                     }
                 }
-                .padding(.horizontal, sidePadding)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
             }
-            .scrollIndicators(.visible)
-            .scrollBounceBehavior(.basedOnSize)
-
-            AlbumEncouragementBanner()
-                .padding(.horizontal, sidePadding)
-                .padding(.top, 14)
-                .padding(.bottom, 12)
+            .padding(32)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .scrollIndicators(.hidden)
+        .safeAreaInset(edge: .bottom, content: {
+            EncouragementBanner()
+        })
         .background {
-            GeometryReader { background in
-                Image("background")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(
-                        width: background.size.width,
-                        height: background.size.height
-                    )
-                    .clipped()
-            }
-            .ignoresSafeArea()
-        }
-        .navigationBarBackButtonHidden(true)
-        .toolbar(.hidden, for: .navigationBar)
-    }
-
-    // MARK: - Title and Back Button
-
-    private var albumHeader: some View {
-        ZStack {
-            Text("Your Flower Album")
-                .font(
-                    .system(
-                        size: 36,
-                        weight: .bold,
-                        design: .rounded
-                    )
-                )
-                .foregroundStyle(
-                    Color(red: 0.35, green: 0.24, blue: 0.13)
-                )
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .padding(.horizontal, 68)
-
-            HStack {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(
-                            .system(size: 25, weight: .semibold)
-                        )
-                        .foregroundStyle(
-                            Color(red: 0.28, green: 0.36, blue: 0.12)
-                        )
-                        .frame(width: 52, height: 52)
-                        .background(
-                            Color(red: 0.80, green: 0.91, blue: 0.48),
-                            in: Circle()
-                        )
+            Color.clear
+                .overlay {
+                    Image("background")
+                        .resizable()
+                        .scaledToFill()
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Back")
-
-                Spacer(minLength: 0)
+                .clipped()
+                .ignoresSafeArea()
+        }
+        .toolbarTitleDisplayMode(.inline)
+        .navigationTitle("Your Flower Album")
+        // Larger brown title. The system back button stays, since we use the NavigationStack.
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Your Flower Album")
+                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color(red: 0.35, green: 0.24, blue: 0.13))
             }
         }
-        .frame(height: 64)
-        .padding(.horizontal, sidePadding)
-        .padding(.top, 4)
-        .padding(.bottom, 12)
-    }
-}
-
-// MARK: - Additional Locked Spaces
-
-private struct AlbumUpcomingFlowerCard: View {
-    let imageName: String
-    let height: CGFloat
-
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .bottomTrailing) {
-
-                // A single white card.
-                RoundedRectangle(
-                    cornerRadius: 24,
-                    style: .continuous
-                )
-                .fill(.white)
-
-                Image(imageName)
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundStyle(
-                        Color(red: 0.89, green: 0.84, blue: 0.80)
-                    )
-                    .frame(
-                        width: geometry.size.width * 0.48,
-                        height: geometry.size.height * 0.62
-                    )
-                    .frame(
-                        maxWidth: .infinity,
-                        maxHeight: .infinity
-                    )
-
-                Image(systemName: "lock.fill")
-                    .font(
-                        .system(size: 20, weight: .semibold)
-                    )
-                    .foregroundStyle(
-                        Color(red: 0.75, green: 0.61, blue: 0.51)
-                    )
-                    .padding(16)
-            }
-        }
-        .frame(height: height)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(
-            "Flower locked. Play more games to unlock flowers."
-        )
     }
 }
 
 // MARK: - Bottom Message
 
-private struct AlbumEncouragementBanner: View {
+private struct EncouragementBanner: View {
     var body: some View {
-        HStack(spacing: 18) {
+        HStack(spacing: 16) {
             Image("flower_buttercup")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 50, height: 62)
+                .frame(width: 56, height: 64)
                 .accessibilityHidden(true)
 
             Text("Play more games to unlock new flowers!")
-                .font(
-                    .system(
-                        size: 25,
-                        weight: .semibold,
-                        design: .rounded
-                    )
-                )
-                .foregroundStyle(
-                    Color(red: 0.43, green: 0.29, blue: 0.17)
-                )
+                .font(.system(.title3, design: .rounded, weight: .semibold))
+                .foregroundStyle(.brown)
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 28)
-        .padding(.vertical, 12)
-        .frame(maxWidth: 740)
+        .padding(.vertical, 14)
         .background(
-            .white,
-            in: RoundedRectangle(
-                cornerRadius: 28,
-                style: .continuous
-            )
+            Color(.systemBackground),
+            in: RoundedRectangle(cornerRadius: 28)
         )
-        .shadow(
-            color: .brown.opacity(0.12),
-            radius: 3,
-            y: 3
-        )
-        .frame(maxWidth: .infinity)
+        .shadow(color: .brown.opacity(0.12), radius: 3, y: 3)
+        .frame(maxWidth: 580)
     }
 }
 
