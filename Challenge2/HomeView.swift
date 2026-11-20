@@ -89,6 +89,15 @@ struct HomeView: View {
                         }
                     }
                 }
+
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink {
+                        FlowerAlbumView()
+                    } label: {
+                        Image(systemName: "book.fill")
+                    }
+                    .accessibilityLabel("Flower album")
+                }
             }
         }
     }
@@ -96,4 +105,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environment(FlowerAlbumViewModel())
 }
