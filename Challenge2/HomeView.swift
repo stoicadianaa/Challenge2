@@ -10,6 +10,16 @@ import SwiftUI
 struct HomeView: View {
     @State private var waterDropsCount = 0
 
+    @State private var homeViewModel = HomeViewModel()
+
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
+
+    // VoiceOver already reads the screen, so the spoken welcome would talk over it.
+    private func greet(_ action: () -> Void) {
+        guard !voiceOverEnabled else { return }
+        action()
+    }
+
     // The category being played; nil means we're on the home screen.
     private let viewModel = GameViewModel()
     @State private var selectedType: GameType?
@@ -39,30 +49,12 @@ struct HomeView: View {
 
                 
                 HStack(spacing: 20) {
-                    CategoryCard(
-                        title: "Words",
-                        emoji: "🔡",
-                        cardColor: Color(red: 0.35, green: 0.6, blue: 0.9)
-                    ) { play(.words) }
-                    
-                    CategoryCard(
-                        title: "Numbers",
-                        emoji: "🧠",
-                        cardColor: Color(red: 0.45, green: 0.75, blue: 0.3)
-                    ) { play(.math) }
-                    
-                    CategoryCard(
-                        title: "Logic",
-                        emoji: "🧩",
-                        cardColor: Color(red: 0.98, green: 0.72, blue: 0.3)
-                    ) { play(.ordering) }
-                    
-                    CategoryCard(
-                        title: "Creativity",
-                        emoji: "🎨",
-                        customCenterIcon: "paintpalette.fill",
-                        cardColor: Color(red: 0.95, green: 0.5, blue: 0.45)
-                    ) {}
+                    ForEach(GameType.allCases) { game in
+                        CategoryCard(game: game) {
+                            // Categories without games do nothing when pressed.
+                            play(game)
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 10)
@@ -88,8 +80,19 @@ struct HomeView: View {
                 }
             }
 
+            .onAppear {
+                greet(homeViewModel.greetOnFirstAppear)
+            }
+
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Button(action: homeViewModel.replayGreeting) {
+                        Image(systemName: "speaker.wave.2.fill")
+                    }
+                    .accessibilityLabel("Hear the welcome again")
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                     } label: {

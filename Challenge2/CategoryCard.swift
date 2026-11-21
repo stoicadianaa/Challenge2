@@ -16,23 +16,7 @@ struct CategoryCard: View {
     let action: () -> Void
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            card
-
-            // The speaker: tap to hear the name
-            Button {
-                Speaker.shared.say(title)
-            } label: {
-                Image(systemName: "speaker.wave.2.fill")
-                    .font(.system(size: 26))
-                    .foregroundStyle(.primary)
-                    .frame(width: 64, height: 64)
-                    .glassEffect(.regular.interactive(), in: Circle())
-            }
-            .buttonStyle(.plain)
-            .padding(14)
-            .accessibilityLabel("Hear the name of \(title)")
-        }
+        card
     }
 
     private var card: some View {
@@ -88,3 +72,18 @@ struct CategoryCard: View {
 }
 
 
+
+extension CategoryCard {
+    /// Builds a card from a game type, so the enum stays the single source of
+    /// truth for each category's name, symbol and color.
+    init(game: GameType, action: @escaping () -> Void) {
+        switch game.symbol {
+        case .text(let text):
+            self.init(title: game.name, emoji: text, cardColor: game.color, action: action)
+        case .systemImage(let name):
+            self.init(title: game.name, customCenterIcon: name, cardColor: game.color, action: action)
+        case .asset:
+            self.init(title: game.name, cardColor: game.color, action: action)
+        }
+    }
+}

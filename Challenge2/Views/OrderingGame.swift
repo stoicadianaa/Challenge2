@@ -86,7 +86,7 @@ struct OrderingGame: View {
 }
 
 #Preview {
-    let game = GameViewModel().games(type: .ordering, difficulty: .easy).first!
+    let game = GameViewModel().games(type: .logic, difficulty: .easy).first!
     if case .ordering(let model) = game.content {
         OrderingGame(game: model, onCorrect: {})
     }

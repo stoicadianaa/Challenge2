@@ -14,7 +14,7 @@ struct Game: Identifiable {
 
     var type: GameType {
         switch content {
-        case .ordering: .ordering
+        case .ordering: .logic
         }
     }
 }

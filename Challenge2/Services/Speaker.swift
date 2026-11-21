@@ -8,8 +8,15 @@
 
 import AVFoundation
 
+/// Anything that can speak a phrase. View models depend on this instead of
+/// `Speaker`, so tests can pass a fake that makes no sound.
 @MainActor
-final class Speaker {
+protocol Speaking {
+    func say(_ text: String)
+}
+
+@MainActor
+final class Speaker: Speaking {
     static let shared = Speaker()
 
     // Kept for the lifetime of the app; a local synthesizer would be

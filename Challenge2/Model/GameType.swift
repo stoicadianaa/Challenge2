@@ -9,42 +9,43 @@ import Foundation
 import SwiftUI
 
 enum GameType: CaseIterable, Identifiable {
-    case ordering, math, memory, words
+    case words, numbers, logic, creativity
 
     var id: Self { self }
 
     var name: String {
         switch self {
-        case .ordering: "Squirrel's Acorn Line"
-        case .math: "Busy Bee Counting"
-        case .memory: "Wise Owl"
-        case .words: "Talking Parrot"
+        case .words: "Words"
+        case .numbers: "Numbers"
+        case .logic: "Logic"
+        case .creativity: "Creativity"
         }
     }
 
-    var spokenName: String {
-        switch self {
-        case .ordering: "Squirrel's Acorn Line"
-        case .math: "Busy Bee Counting"
-        case .memory: "Wise Owl"
-        case .words: "Talking Parrot"
-        }
+    var spokenName: String { name }
+
+    /// "A, B, C, or D" — for reading every category aloud.
+    static var spokenList: String {
+        let names = allCases.map(\.spokenName)
+        guard let last = names.last, names.count > 1 else { return names.first ?? "" }
+        return names.dropLast().joined(separator: ", ") + ", or " + last
     }
 
     var symbol: GameSymbol {
         switch self {
-        case .ordering: .text("🐿️")
-        case .math: .text("🐝")
-        case .memory: .text("🦉")
-        case .words: .text("🦜")
+        case .words: .text("🔡")
+        case .numbers: .text("🧠")
+        case .logic: .text("🧩")
+        case .creativity: .text("🎨")
         }
     }
+
     var color: Color {
         switch self {
-        case .ordering: .brown
-        case .math: .yellow
-        case .memory: .purple
-        case .words: .green
+        case .words: Color(red: 0.35, green: 0.6, blue: 0.9)
+        case .numbers: Color(red: 0.45, green: 0.75, blue: 0.3)
+        case .logic: Color(red: 0.98, green: 0.72, blue: 0.3)
+        case .creativity: Color(red: 0.95, green: 0.5, blue: 0.45)
         }
     }
 }
