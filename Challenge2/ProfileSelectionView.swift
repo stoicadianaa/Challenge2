@@ -22,12 +22,23 @@ struct ProfileSelectionView: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .center) {
-                Image("background")
+        ZStack() {
+            Image("background")
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+            
+            VStack(spacing: 24) {
+                Text("Who's playing?")
+                    .font(.system(size: 50, weight: .bold, design: .rounded))
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 12)
+                    .glassEffect(.regular, in: .capsule)
+                
+                Image("mascot_genderless_happy")
                     .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
+                    .scaledToFit()
+                    .frame(width: 200)
 
                 LazyVGrid(columns: columns, spacing: 32) {
                     ForEach(
@@ -44,12 +55,19 @@ struct ProfileSelectionView: View {
                     }
                 }
                 .padding(.horizontal, 40)
-                .padding(.vertical, 20)
-
+                .scaleEffect(appeared ? 1 : 0.9)
+                .opacity(appeared ? 1 : 0)
+                
+            }
+            .padding(.vertical, 20)
+        }
+        .overlay{
                 if showCreator {
-                    Color.black.opacity(0.35)
-                        .ignoresSafeArea()
-                        .transition(.opacity)
+                    ZStack{
+                        Color.black.opacity(0.35)
+                            .ignoresSafeArea()
+                            .transition(.opacity)
+                    
                     ProfileCreatorView(
                         onSave: { profile in
                             store.add(profile)
@@ -61,10 +79,9 @@ struct ProfileSelectionView: View {
                     )
                     .transition(.scale(scale: 0.85).combined(with: .opacity))
                 }
+                    .transition(.opacity)
             }
-            .navigationTitle("Who's playing?")
-        }
-        .ignoresSafeArea(.container, edges: .all)
+    }
         .alert(
             "Delete this profile?",
             isPresented: Binding(
@@ -92,8 +109,7 @@ struct ProfileSelectionView: View {
         }
     }
 
-    private func profileCard(_ profile: ChildProfile, color: Color) -> some View
-    {
+    private func profileCard(_ profile: ChildProfile, color: Color) -> some View {
         Button {
             onSelect(profile)
         } label: {
@@ -102,11 +118,12 @@ struct ProfileSelectionView: View {
 
                 Text(profile.name)
                     .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundColor(PF.brown)
+                    .foregroundColor(.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 6)
+                    .glassEffect(.regular, in: .capsule)
             }
         }
         .buttonStyle(BouncyStyle())
@@ -117,37 +134,33 @@ struct ProfileSelectionView: View {
                 Label("Delete profile", systemImage: "trash")
             }
         }
+        .accessibilityLabel(profile.name)
+        .accessibilityHint("Double tap to play. Touch and hold to delete.")
     }
 
+    
     private var addCard: some View {
         Button {
             withAnimation(.spring()) { showCreator = true }
         } label: {
             VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(PF.paper.opacity(0.85))
-                        .overlay(
-                            Circle().stroke(
-                                .green,
-                                style: StrokeStyle(
-                                    lineWidth: 6,
-                                    dash: [12, 10]
-                                )
-                            )
-                        )
                     Image(systemName: "plus")
-                        .font(.system(size: 60, weight: .heavy))
-                        .foregroundColor(.green)
-                }
+                    .font(.system(size: 60, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .frame(width: 150, height: 150)
+                    .glassEffect(.regular.tint(.green.opacity(0.15)), in: .circle)
+                
                 .frame(width: 150, height: 150)
                 .shadow(color: .black.opacity(0.15), radius: 6, y: 4)
 
                 Text("New player")
                     .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundColor(PF.brown)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 6)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 8)
+                    .glassEffect(.regular, in: .capsule)
             }
         }
         .buttonStyle(BouncyStyle())

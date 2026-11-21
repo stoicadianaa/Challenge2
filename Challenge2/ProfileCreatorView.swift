@@ -30,37 +30,39 @@ struct ProfileCreatorView: View {
     var body: some View {
         VStack(spacing: 20) {
             Text("Create your player")
-                .font(.system(size: 34, weight: .heavy))
-                .foregroundColor(PF.brown.opacity(0.8))
+                .font(.system(size: 34, weight: .heavy, design: .rounded))
+                .foregroundStyle(.primary)
 
             AvatarCircle(emoji: avatar, size: 200, ring: PF.orange)
 
             Text("Pick your friend:")
                 .font(.system(.callout).weight(.semibold))
-                .foregroundColor(PF.brown.opacity(0.8))
+                .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
                 ForEach(PF.avatars, id: \.self) { emoji in
-                    let isSelected = avatar == emoji
-                    Text(emoji)
+                let isSelected = avatar == emoji
+
+                Button {
+                    avatar = emoji
+                } label: {
+                        Text(emoji)
                         .font(.system(size: 32))
                         .frame(width: 54, height: 54)
-                        .background(
-                            Circle().fill(isSelected ? .orange.opacity(0.35) : Color.white.opacity(0.7))
-                        )
-                        .overlay(
-                            Circle().stroke(isSelected ? .orange : .clear, lineWidth: 3)
-                        )
-                        .onTapGesture {
-                            avatar = emoji
-                        }
-                }
+                        .background(Circle().fill(isSelected ? PF.orange.opacity(0.3) : Color.clear)
+                                        )
+                        .background(.fill.tertiary, in: Circle())
+                        .overlay(Circle().stroke(isSelected ? PF.orange : .clear, lineWidth: 3))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                            }
             }
 
             TextField("My name is…", text: nameBinding)
                 .font(.system(size: 30, weight: .bold))
                 .multilineTextAlignment(.center)
-                .foregroundColor(PF.brown)
+                .foregroundStyle(.primary)
                 .textInputAutocapitalization(.words)
                 .autocorrectionDisabled()
                 .submitLabel(.done)
@@ -76,39 +78,29 @@ struct ProfileCreatorView: View {
 
             HStack(spacing: 18) {
                 Button(role: .destructive, action: onCancel){
-                    Label("Cancel", systemImage: "x.circle.fill")
+                    Label("Cancel", systemImage: "x.mark")
+                        .font(.title3.weight(.semibold))
                 }
                 .controlSize(.extraLarge) 
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glass)
 
                 Button {
                     onSave(ChildProfile(name: trimmedName, avatar: avatar))
-                } label: {
-                    HStack(spacing: 8) {
-                        Text("Let's go!")
-                        Image(systemName: "checkmark.fill")
-                    }
-                    .font(.system(size: 24, weight: .heavy))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 34)
-                    .padding(.vertical, 14)
-                    .background(.green, in: Capsule())
-                }
-                .buttonStyle(BouncyStyle())
-                .disabled(trimmedName.isEmpty)
-                .opacity(trimmedName.isEmpty ? 0.5 : 1)
+                                } label: {
+                                    Label("Let's go!", systemImage: "checkmark")
+                                        .font(.title3.weight(.heavy))
+                                }
+                                .buttonStyle(.glassProminent)
+                                .tint(.green)
+                                .controlSize(.extraLarge)
+                                .disabled(trimmedName.isEmpty)
             }
             .padding(.top, 4)
         }
         .padding(32)
-        .frame(maxWidth: 640)
-        .background(PF.paper, in: RoundedRectangle(cornerRadius: 36))
-        .overlay(
-            RoundedRectangle(cornerRadius: 36)
-                .stroke(.brown.opacity(0.35), lineWidth: 4)
-        )
-        .shadow(color: .black.opacity(0.2), radius: 20, y: 10)
-        .padding(24)
+                .frame(maxWidth: 640)
+                .glassEffect(.regular, in: .rect(cornerRadius: 36))
+                .padding(24)
     }
 }
 
