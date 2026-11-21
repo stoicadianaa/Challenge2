@@ -38,10 +38,11 @@ struct CategoryCard: View {
             .padding(.vertical, 24)
             .padding(.horizontal, 12)
             .frame(maxWidth: .infinity, minHeight: 240, maxHeight: 260)
-            .glassEffect(.regular.tint(cardColor.opacity(0.55)),
-                         in: .rect(cornerRadius: 36))
+            .glassEffect(
+                .regular.tint(cardColor.opacity(0.55)),
+                in: .rect(cornerRadius: 36)
+            )
         }
-        .buttonStyle(ScaleButtonStyle())
         .accessibilityLabel(title)
     }
 
@@ -71,17 +72,25 @@ struct CategoryCard: View {
     }
 }
 
-
-
 extension CategoryCard {
     /// Builds a card from a game type, so the enum stays the single source of
     /// truth for each category's name, symbol and color.
     init(game: GameType, action: @escaping () -> Void) {
         switch game.symbol {
         case .text(let text):
-            self.init(title: game.name, emoji: text, cardColor: game.color, action: action)
+            self.init(
+                title: game.name,
+                emoji: text,
+                cardColor: game.color,
+                action: action
+            )
         case .systemImage(let name):
-            self.init(title: game.name, customCenterIcon: name, cardColor: game.color, action: action)
+            self.init(
+                title: game.name,
+                customCenterIcon: name,
+                cardColor: game.color,
+                action: action
+            )
         case .asset:
             self.init(title: game.name, cardColor: game.color, action: action)
         }
