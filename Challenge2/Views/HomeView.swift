@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var waterDropsCount = 0
-
+    @AppStorage("waterDrops") private var waterDropsCount = 0
+    
     @State private var homeViewModel = HomeViewModel()
 
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
@@ -94,7 +94,8 @@ struct HomeView: View {
                 }
                 
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
+                    NavigationLink {
+                        GardenView()
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "drop.fill")
@@ -105,6 +106,7 @@ struct HomeView: View {
                                 .foregroundStyle(.primary)
                         }
                     }
+                    .accessibilityLabel("My garden, \(waterDropsCount) water drops")
                 }
 
                 ToolbarItem(placement: .topBarLeading) {
