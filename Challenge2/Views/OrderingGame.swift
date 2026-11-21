@@ -9,7 +9,7 @@ import SwiftUI
 
 struct OrderingGame: View {
     @State var game: OrderingGameModel
-    @State private var checkResult: Bool? = nil
+    @State private var showTryAgain = false
 
     // Called when the order is correct. The session decides what happens next.
     let onCorrect: () -> Void
@@ -43,21 +43,26 @@ struct OrderingGame: View {
             .font(.system(size: 180))
             .reorderContainer(for: OrderingGameItem.self) { difference in
                 game.apply(difference)
-                checkResult = nil
+                showTryAgain = false
             }
 
             Spacer()
 
             Button("Check") {
-                checkResult = game.isInCorrectOrder
+                if game.isInCorrectOrder {
+                    // Right answer: straight on, the reward screen does the celebrating.
+                    onCorrect()
+                } else {
+                    showTryAgain = true
+                }
             }
             .buttonStyle(.glassProminent)
             .tint(.green)
             .controlSize(.extraLarge)
             .font(.title.bold())
 
-            if let result = checkResult {
-                Text(result ? "Correct! 🎉" : "Try again")
+            if showTryAgain {
+                Text("Try again")
             }
 
             Spacer()
@@ -72,15 +77,6 @@ struct OrderingGame: View {
         }
         .onAppear {
             game.shuffle()
-        }
-        // On a correct answer, wait 1.5s so the child sees "Correct!", then continue.
-        // Unlike a plain Task, .task is cancelled if the view goes away, so a game
-        // the child left can't still finish and award drops.
-        .task(id: checkResult) {
-            guard checkResult == true else { return }
-            try? await Task.sleep(for: .seconds(1.5))
-            guard !Task.isCancelled else { return }
-            onCorrect()
         }
     }
 }

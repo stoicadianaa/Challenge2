@@ -11,6 +11,8 @@ struct Game: Identifiable {
     let id = UUID()
     let difficulty: Difficulty
     let content: GameContent
+    /// Water drops this game is worth when completed.
+    var drops = 1
 
     var type: GameType {
         switch content {

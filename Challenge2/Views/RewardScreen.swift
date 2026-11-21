@@ -7,44 +7,9 @@
 
 import SwiftUI
 
-struct SpeechBubble: Shape {
-    static let tailSize: CGFloat = 16
-    var tailAtTop: Bool
-
-    func path(in rect: CGRect) -> Path {
-        let tail = Self.tailSize
-
-        // The bubble body is the rect minus the strip reserved for the tail.
-        var body = rect
-        if tailAtTop {
-            body.origin.y += tail
-            body.size.height -= tail
-        } else {
-            body.origin.x += tail
-            body.size.width -= tail
-        }
-
-        var path = Path(roundedRect: body, cornerRadius: 20)
-
-        // The tail: a triangle on the body's edge, tip pointing outward.
-        var triangle = Path()
-        if tailAtTop {
-            triangle.move(to: CGPoint(x: rect.midX - tail, y: body.minY))
-            triangle.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
-            triangle.addLine(to: CGPoint(x: rect.midX + tail, y: body.minY))
-        } else {
-            triangle.move(to: CGPoint(x: body.minX, y: rect.midY - tail))
-            triangle.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
-            triangle.addLine(to: CGPoint(x: body.minX, y: rect.midY + tail))
-        }
-        triangle.closeSubpath()
-
-        path.addPath(triangle)
-        return path
-    }
-}
-
 struct RewardScreen: View {
+    // How many water drops this session earned; shown as "+N".
+    var drops = 1
     var onContinue: () -> Void = {}
 
     private static let phrases = ["Yay!", "Hooray!", "Wow!", "You did it!", "Yippee!"]
@@ -78,34 +43,35 @@ struct RewardScreen: View {
 
     var rewardCard: some View {
         Button(action: speak) {
-            VStack(spacing: 16) {
-                HStack {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.yellow)
-                        .symbolEffect(.bounce, value: appeared)
-                        .accessibilityHidden(true)
-                    Text(message)
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.yellow)
-                        .symbolEffect(.bounce, value: appeared)
-                        .accessibilityHidden(true)
-                }
-                .font(.title.weight(.semibold))
+            // The same bubble as the welcome screen, with the reward as its content.
+            SpeechBubble {
+                VStack(spacing: 16) {
+                    HStack {
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(.yellow)
+                            .symbolEffect(.bounce, value: appeared)
+                            .accessibilityHidden(true)
+                        Text(message)
+                        Image(systemName: "star.fill")
+                            .foregroundStyle(.yellow)
+                            .symbolEffect(.bounce, value: appeared)
+                            .accessibilityHidden(true)
+                    }
+                    .font(.title.weight(.semibold))
 
-                HStack {
-                    Image(systemName: "drop.fill")
-                        .foregroundStyle(.blue)
-                        .symbolEffect(.bounce, value: appeared)
-                    Text("+1")
+                    HStack {
+                        Image(systemName: "drop.fill")
+                            .foregroundStyle(.blue)
+                            .symbolEffect(.bounce, value: appeared)
+                        Text("+\(drops)")
+                    }
+                    .font(.system(size: heroSize, weight: .heavy, design: .rounded))
                 }
-                .font(.system(size: heroSize, weight: .heavy, design: .rounded))
+                .padding(.vertical, 16)
             }
-            .padding(32)
-            .padding(isStacked ? .top : .leading, SpeechBubble.tailSize)
-            .background(.regularMaterial, in: SpeechBubble(tailAtTop: isStacked))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(message) You earned one water drop.")
+        .accessibilityLabel("\(message) You earned \(drops) water \(drops == 1 ? "drop" : "drops").")
         .accessibilityHint("Plays the message again")
         .scaleEffect(appeared || reduceMotion ? 1 : 0.8)
         .opacity(appeared ? 1 : 0)
