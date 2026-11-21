@@ -9,7 +9,7 @@ import SwiftUI
 
 struct GardenView: View {
 
-    let viewModel = GardenViewModel()
+    @State private var viewModel = GardenViewModel()
 
     var body: some View {
         NavigationStack {
@@ -18,6 +18,9 @@ struct GardenView: View {
                 VStack(spacing: 4) {
                     Text("My Garden")
                         .font(.system(size: 50, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .glassEffect(.regular, in: .capsule)
                 }
 
                 Spacer()
@@ -31,6 +34,7 @@ struct GardenView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 250)
+                        .accessibilityHidden(true)
 
                     Spacer()
 
@@ -43,7 +47,6 @@ struct GardenView: View {
                 .padding(.horizontal, 20)
             }
             .padding()
-
             .background(
                 Image("background")
                     .resizable()
@@ -51,11 +54,9 @@ struct GardenView: View {
                     .ignoresSafeArea()
             )
             .navigationBarTitleDisplayMode(.inline)
-
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
-
                         Image(systemName: "drop.fill")
                             .foregroundStyle(.blue)
 
@@ -64,55 +65,49 @@ struct GardenView: View {
                                 .system(
                                     size: 22,
                                     weight: .bold,
-                                    design: .rounded
-                                )
-                            )
+                                    design: .rounded))
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("\(viewModel.availableDrops) water drops")
                 }
             }
         }
     }
 
+    
     private var stageBar: some View {
-
-        HStack(spacing: 15) {
-
-            ForEach(PlantStage.allCases, id: \.self) { stage in
-
-                let reached = stage.rawValue <= viewModel.stage.rawValue
-
-                Image(stage.image)
-                    .resizable()
-                    .scaledToFit()
-                    .padding(14)
-                    .frame(width: 84, height: 84)
-
-                    .background(
-                        .white.opacity(0.9),
-                        in: Circle()
-                    )
-                    .overlay {
-
-                        Circle()
-                            .stroke(
-                                .green,
-                                lineWidth: stage == viewModel.stage ? 5 : 0
-                            )
-                    }
-                    .saturation(reached ? 1 : 0)
-
-                    .opacity(reached ? 1 : 0.45)
-
-                    .accessibilityLabel(stage.image)
-                    .accessibilityAddTraits(
-                        stage == viewModel.stage ? .isSelected : []
-                    )
+        GlassEffectContainer(spacing: 15) {
+            HStack(spacing: 15) {
+                ForEach(PlantStage.allCases, id: \.self) { stage in
+                    
+                    let reached = stage.rawValue <= viewModel.stage.rawValue
+                    
+                    Image(stage.image)
+                        .resizable()
+                        .scaledToFit()
+                        .saturation(reached ? 1 : 0)
+                        .opacity(reached ? 1 : 0.45)
+                        .padding(14)
+                        .frame(width: 84, height: 84)
+                        .glassEffect(.regular, in: .circle)
+                        .overlay {
+                            Circle()
+                                .stroke(
+                                    .green,
+                                    lineWidth: stage == viewModel.stage ? 5 : 0
+                                )
+                        }
+                        .accessibilityLabel(stage.image)
+                        .accessibilityAddTraits(
+                            stage == viewModel.stage ? .isSelected : []
+                        )
+                }
             }
+            .animation(
+                .spring(response: 0.4, dampingFraction: 0.75),
+                value: viewModel.stage
+            )
         }
-        .animation(
-            .spring(response: 0.4, dampingFraction: 0.75),
-            value: viewModel.stage
-        )
     }
 
     var plant: some View {
@@ -152,7 +147,7 @@ struct GardenView: View {
                     )
                 }
                 .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .controlSize(.extraLarge)
 
                 .disabled(viewModel.availableDrops == 0)
             }
