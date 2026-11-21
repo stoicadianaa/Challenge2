@@ -35,10 +35,6 @@ struct ProfileCreatorView: View {
 
             AvatarCircle(emoji: avatar, size: 200, ring: PF.orange)
 
-            Text("Pick your friend:")
-                .font(.system(.callout).weight(.semibold))
-                .foregroundStyle(.secondary)
-
             HStack(spacing: 10) {
                 ForEach(PF.avatars, id: \.self) { emoji in
                 let isSelected = avatar == emoji
@@ -77,18 +73,20 @@ struct ProfileCreatorView: View {
                 .frame(maxWidth: 420)
 
             HStack(spacing: 18) {
+                
                 Button(role: .destructive, action: onCancel){
-                    Label("Cancel", systemImage: "x.mark")
+                    Label("Cancel", systemImage: "xmark")
                         .font(.title3.weight(.semibold))
                 }
-                .controlSize(.extraLarge) 
-                .buttonStyle(.glass)
+                .tint(.red)
+                .controlSize(.extraLarge)
+                .buttonStyle(.glassProminent)
 
                 Button {
                     onSave(ChildProfile(name: trimmedName, avatar: avatar))
                                 } label: {
                                     Label("Let's go!", systemImage: "checkmark")
-                                        .font(.title3.weight(.heavy))
+                                        .font(.title3.weight(.semibold))
                                 }
                                 .buttonStyle(.glassProminent)
                                 .tint(.green)

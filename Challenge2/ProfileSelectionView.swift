@@ -77,7 +77,8 @@ struct ProfileSelectionView: View {
                             withAnimation(.spring()) { showCreator = false }
                         }
                     )
-                    .transition(.scale(scale: 0.85).combined(with: .opacity))
+                    .transition(.scale(scale: 0.85)
+                        .combined(with: .opacity))
                 }
                     .transition(.opacity)
             }
