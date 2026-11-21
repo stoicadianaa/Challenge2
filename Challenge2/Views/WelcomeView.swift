@@ -20,7 +20,7 @@ struct WelcomeView: View {
 
                 ZStack(alignment: .topTrailing) {
 
-                    Image("mascot_genderless_happy")
+                    Image("mascot_genderless_celebrating")
                         .resizable()
                         .scaledToFit()
                         .containerRelativeFrame(.vertical) { height, _ in height * 0.44 }
@@ -33,7 +33,7 @@ struct WelcomeView: View {
                         )
                         .accessibilityHidden(true)
 
-                    SpeechBubble(text: "I’m Bloomy!")
+                    SpeechBubble(text: "Welcome!")
                         .offset(x: 150, y: -20)
                         .scaleEffect(showBubble ? 1 : 0.2, anchor: .bottomLeading)
                         .opacity(showBubble ? 1 : 0)
