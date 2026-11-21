@@ -12,7 +12,6 @@ struct GardenView: View {
     @State private var viewModel = GardenViewModel()
 
     var body: some View {
-        NavigationStack {
             VStack(spacing: 16) {
 
                 VStack(spacing: 4) {
@@ -71,7 +70,6 @@ struct GardenView: View {
                     .accessibilityLabel("\(viewModel.availableDrops) water drops")
                 }
             }
-        }
     }
 
     

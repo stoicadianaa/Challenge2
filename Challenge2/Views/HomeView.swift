@@ -8,58 +8,56 @@
 import SwiftUI
 
 struct HomeView: View {
-    
-    @State private var gardenViewModel = GardenViewModel()
-
     @AppStorage("waterDrops") private var waterDropsCount = 0
     
+    @State private var homeViewModel = HomeViewModel()
+
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
+
+    // VoiceOver already reads the screen, so the spoken welcome would talk over it.
+    private func greet(_ action: () -> Void) {
+        guard !voiceOverEnabled else { return }
+        action()
+    }
+
+    // The category being played; nil means we're on the home screen.
+    private let viewModel = GameViewModel()
+    @State private var selectedType: GameType?
+
+    private func play(_ type: GameType) {
+        if !viewModel.games(for: type).isEmpty { selectedType = type }
+    }
+
     var body: some View {
-        
         NavigationStack {
-            
             VStack(spacing: 16) {
 
                 Spacer()
                 
                 VStack(spacing: 4) {
-                    Text("Welcome to Wonderwood!")
-                        .font(.system(size: 50, weight: .bold, design: .rounded))
-                        
-                    Text("Choose a learning adventure:")
-                        .font(.system(size: 32, weight: .medium, design: .rounded))
+                    Text("Welcome to WonderBloom!")
+                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .glassEffect(.regular, in: .capsule)
                 }
-                
-                Spacer()
+                                
+                Image("mascot_genderless_happy")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 350)
+
                 
                 HStack(spacing: 20) {
-                    CategoryCard(
-                        title: "Words",
-                        mainSymbolText: "Aa",
-                        cardColor: Color(red: 0.35, green: 0.6, blue: 0.9)
-                    ) {}
-                    
-                    CategoryCard(
-                        title: "Numbers",
-                        mainSymbolText: "1 2 3",
-                        cardColor: Color(red: 0.45, green: 0.75, blue: 0.3)
-                    ) {}
-                    
-                    CategoryCard(
-                        title: "Logic",
-                        mainSymbolText: "",
-                        customCenterIcon: "lightbulb.fill",
-                        cardColor: Color(red: 0.98, green: 0.72, blue: 0.3)
-                    ) {}
-                    
-                    CategoryCard(
-                        title: "Creativity",
-                        mainSymbolText: "",
-                        customCenterIcon: "paintpalette.fill",
-                        cardColor: Color(red: 0.95, green: 0.5, blue: 0.45)
-                    ) {}
+                    ForEach(GameType.allCases) { game in
+                        CategoryCard(game: game) {
+                            // Categories without games do nothing when pressed.
+                            play(game)
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, 10)            
+                .padding(.horizontal, 10)
                 .background(Color.clear)
                 
                 Spacer()
@@ -73,19 +71,31 @@ struct HomeView: View {
                     .ignoresSafeArea()
             )
 
+            // Pushes the session while selectedType is set; going back resets it to nil.
+            .navigationDestination(item: $selectedType) { type in
+                // Plays 1 game by default; pass `gameCount:` for longer sessions.
+                // Each game played earns 1 drop.
+                GameSessionView(games: viewModel.games(for: type)) { drops in
+                    waterDropsCount += drops
+                }
+            }
+
+            .onAppear {
+                greet(homeViewModel.greetOnFirstAppear)
+            }
+
             .navigationBarTitleDisplayMode(.inline)
-            
             .toolbar {
-                
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                    } label: {
-                        Image(systemName: "gearshape.fill")
+                    Button(action: homeViewModel.replayGreeting) {
+                        Image(systemName: "speaker.wave.2.fill")
                     }
+                    .accessibilityLabel("Hear the welcome again")
                 }
                 
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
+                    NavigationLink {
+                        GardenView()
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "drop.fill")
@@ -96,6 +106,16 @@ struct HomeView: View {
                                 .foregroundStyle(.primary)
                         }
                     }
+                    .accessibilityLabel("My garden, \(waterDropsCount) water drops")
+                }
+
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink {
+                        FlowerAlbumView()
+                    } label: {
+                        Image(systemName: "book.fill")
+                    }
+                    .accessibilityLabel("Flower album")
                 }
             }
         }
@@ -104,4 +124,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environment(FlowerAlbumViewModel())
 }
