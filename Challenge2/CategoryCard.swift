@@ -16,6 +16,10 @@ struct CategoryCard: View {
     let action: () -> Void
 
     var body: some View {
+        card
+    }
+
+    private var card: some View {
         Button(action: action) {
             VStack(spacing: 16) {
                 Spacer(minLength: 0)
@@ -68,3 +72,18 @@ struct CategoryCard: View {
 }
 
 
+
+extension CategoryCard {
+    /// Builds a card from a game type, so the enum stays the single source of
+    /// truth for each category's name, symbol and color.
+    init(game: GameType, action: @escaping () -> Void) {
+        switch game.symbol {
+        case .text(let text):
+            self.init(title: game.name, emoji: text, cardColor: game.color, action: action)
+        case .systemImage(let name):
+            self.init(title: game.name, customCenterIcon: name, cardColor: game.color, action: action)
+        case .asset:
+            self.init(title: game.name, cardColor: game.color, action: action)
+        }
+    }
+}

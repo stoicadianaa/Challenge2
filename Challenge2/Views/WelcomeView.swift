@@ -1,13 +1,25 @@
 import SwiftUI
 
 struct WelcomeView: View {
-    var onStart: () -> Void = {}
-    
+    // Start moves on to the home screen; the app itself doesn't need to know.
+    @State private var hasStarted = false
+
     @State private var floating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showBubble = false
 
+    @State private var viewModel = WelcomeViewModel()
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
+
     var body: some View {
+        if hasStarted {
+            HomeView()
+        } else {
+            welcome
+        }
+    }
+
+    private var welcome: some View {
         ZStack {
             Image("background")
                 .resizable()
@@ -50,7 +62,9 @@ struct WelcomeView: View {
                     }
                 }
 
-                Button(action: onStart) {
+                Button {
+                    withAnimation { hasStarted = true }
+                } label: {
                     Label("Start", systemImage: "play.fill")
                         .font(.system(.title, design: .rounded, weight: .bold))
                         .padding(.horizontal, 24)
@@ -60,6 +74,11 @@ struct WelcomeView: View {
                 .tint(.green)
                 .controlSize(.extraLarge)
             }
+        }
+        .onAppear {
+            // VoiceOver already reads the screen, so the spoken hello would talk over it.
+            guard !voiceOverEnabled else { return }
+            viewModel.greetOnFirstAppear()
         }
     }
 }

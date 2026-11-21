@@ -9,7 +9,25 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var waterDropsCount = 0
-    
+
+    @State private var homeViewModel = HomeViewModel()
+
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
+
+    // VoiceOver already reads the screen, so the spoken welcome would talk over it.
+    private func greet(_ action: () -> Void) {
+        guard !voiceOverEnabled else { return }
+        action()
+    }
+
+    // The category being played; nil means we're on the home screen.
+    private let viewModel = GameViewModel()
+    @State private var selectedType: GameType?
+
+    private func play(_ type: GameType) {
+        if !viewModel.games(for: type).isEmpty { selectedType = type }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -31,30 +49,12 @@ struct HomeView: View {
 
                 
                 HStack(spacing: 20) {
-                    CategoryCard(
-                        title: "Words",
-                        emoji: "🔡",
-                        cardColor: Color(red: 0.35, green: 0.6, blue: 0.9)
-                    ) {}
-                    
-                    CategoryCard(
-                        title: "Numbers",
-                        emoji: "🧠",
-                        cardColor: Color(red: 0.45, green: 0.75, blue: 0.3)
-                    ) {}
-                    
-                    CategoryCard(
-                        title: "Logic",
-                        emoji: "🧩",
-                        cardColor: Color(red: 0.98, green: 0.72, blue: 0.3)
-                    ) {}
-                    
-                    CategoryCard(
-                        title: "Creativity",
-                        emoji: "🎨",
-                        customCenterIcon: "paintpalette.fill",
-                        cardColor: Color(red: 0.95, green: 0.5, blue: 0.45)
-                    ) {}
+                    ForEach(GameType.allCases) { game in
+                        CategoryCard(game: game) {
+                            // Categories without games do nothing when pressed.
+                            play(game)
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.horizontal, 10)
@@ -71,13 +71,26 @@ struct HomeView: View {
                     .ignoresSafeArea()
             )
 
+            // Pushes the session while selectedType is set; going back resets it to nil.
+            .navigationDestination(item: $selectedType) { type in
+                // Plays 1 game by default; pass `gameCount:` for longer sessions.
+                // Each game played earns 1 drop.
+                GameSessionView(games: viewModel.games(for: type)) { drops in
+                    waterDropsCount += drops
+                }
+            }
+
+            .onAppear {
+                greet(homeViewModel.greetOnFirstAppear)
+            }
+
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                    } label: {
-                        Image(systemName: "gearshape.fill")
+                    Button(action: homeViewModel.replayGreeting) {
+                        Image(systemName: "speaker.wave.2.fill")
                     }
+                    .accessibilityLabel("Hear the welcome again")
                 }
                 
                 ToolbarItem(placement: .topBarLeading) {

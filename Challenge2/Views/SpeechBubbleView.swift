@@ -32,14 +32,18 @@ struct BubbleShape: Shape {
     }
 }
 
-struct SpeechBubble: View {
-    let text: String
+/// The speech bubble shared by the welcome and reward screens.
+/// Pass any content, or use `SpeechBubble(text:)` for the plain-text look.
+struct SpeechBubble<Content: View>: View {
     private let tailSize: CGFloat = 22
+    private let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
 
     var body: some View {
-        Text(text)
-            .font(.system(.title, design: .rounded, weight: .heavy))
-            .foregroundStyle(.secondary)
+        content
             .padding(.horizontal, 28)
             .padding(.top, 16)
             .padding(.bottom, 16 + tailSize)
@@ -47,6 +51,16 @@ struct SpeechBubble: View {
     }
 }
 
+extension SpeechBubble where Content == Text {
+    init(text: String) {
+        self.init {
+            Text(text)
+                .font(.system(.title, design: .rounded, weight: .heavy))
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
 #Preview {
-        SpeechBubble(text: "I’m Bloomy!")
+    SpeechBubble(text: "I’m Bloomy!")
 }
