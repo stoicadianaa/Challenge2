@@ -9,43 +9,62 @@ import SwiftUI
 
 struct CategoryCard: View {
     let title: String
+    var emoji: String? = nil
     var mainSymbolText: String = ""
     var customCenterIcon: String? = nil
     let cardColor: Color
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 12) {
-                Spacer()
-                
-                if let customIcon = customCenterIcon {
-                    Image(systemName: customIcon)
-                        .font(.system(size: 45))
-                        .foregroundColor(.white)
-                } else {
-                    Text(mainSymbolText)
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                }
-                
-                Spacer()
-                
+            VStack(spacing: 16) {
+                Spacer(minLength: 0)
+
+                icon
+
+                Spacer(minLength: 0)
+
                 Text(title)
-                    .font(.system(size: 22, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                
-                Spacer()
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: .infinity, maxHeight: 220)
-            .background(cardColor)
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(.white.opacity(0.4), lineWidth: 4)
-            )
-            .shadow(color: cardColor.opacity(0.4), radius: 8, x: 0, y: 6)
+            .padding(.vertical, 24)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, minHeight: 240, maxHeight: 260)
+            .glassEffect(.regular.tint(cardColor.opacity(0.55)),
+                         in: .rect(cornerRadius: 36))
         }
-            .buttonStyle(ScaleButtonStyle())
+        .buttonStyle(ScaleButtonStyle())
+        .accessibilityLabel(title)
+    }
+
+    private var icon: some View {
+        ZStack {
+            Circle()
+                .fill(.white.opacity(0.25))
+                .frame(width: 130, height: 130)
+
+            if let emoji {
+                Text(emoji)
+                    .font(.system(size: 80))
+            } else if let customIcon = customCenterIcon {
+                Image(systemName: customIcon)
+                    .font(.system(size: 60, weight: .bold))
+                    .foregroundStyle(.white)
+                    .symbolRenderingMode(.hierarchical)
+            } else {
+                Text(mainSymbolText)
+                    .font(.system(size: 48, weight: .heavy, design: .rounded))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+            }
+        }
+        .accessibilityHidden(true)
     }
 }
+
+
