@@ -5,7 +5,6 @@
 //  Created by Diana Cristina Stoica on 19/11/2026.
 //
 
-import AVFoundation
 import SwiftUI
 
 struct SpeechBubble: Shape {
@@ -53,9 +52,6 @@ struct RewardScreen: View {
     
     @State private var appeared = false
 
-    // todo make the voice nicer
-    @State private var synthesizer = AVSpeechSynthesizer()
-
     @ScaledMetric(relativeTo: .largeTitle) private var heroSize: CGFloat = 72
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -70,13 +66,7 @@ struct RewardScreen: View {
     private func speak() {
         guard !voiceOverEnabled else { return }
 
-        // Stop whatever is playing first, so quick taps don't queue up.
-        _ = synthesizer.stopSpeaking(at: .immediate)
-
-        let utterance = AVSpeechUtterance(string: message)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.pitchMultiplier = 1.6
-        synthesizer.speak(utterance)
+        Speaker.shared.say(message)
     }
 
     func mascot(axis: Axis.Set, fraction: CGFloat) -> some View {

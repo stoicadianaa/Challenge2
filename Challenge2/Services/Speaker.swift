@@ -34,7 +34,7 @@ final class Speaker {
     }
 
     // Highest-quality English voice installed (Premium > Enhanced). Falls back to the
-//     system's standard en-US voice rather than risking a novelty voice.
+    // system's standard en-US voice rather than risking a novelty voice.
     // Computed on every call so a voice downloaded while the app runs is picked up.
     private func bestVoice() -> AVSpeechSynthesisVoice? {
         let better = AVSpeechSynthesisVoice.speechVoices().filter {
