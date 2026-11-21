@@ -16,6 +16,26 @@ struct CategoryCard: View {
     let action: () -> Void
 
     var body: some View {
+        ZStack(alignment: .topTrailing) {
+            card
+
+            // The speaker: tap to hear the name
+            Button {
+                Speaker.shared.say(title)
+            } label: {
+                Image(systemName: "speaker.wave.2.fill")
+                    .font(.system(size: 26))
+                    .foregroundStyle(.primary)
+                    .frame(width: 64, height: 64)
+                    .glassEffect(.regular.interactive(), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(14)
+            .accessibilityLabel("Hear the name of \(title)")
+        }
+    }
+
+    private var card: some View {
         Button(action: action) {
             VStack(spacing: 16) {
                 Spacer(minLength: 0)
