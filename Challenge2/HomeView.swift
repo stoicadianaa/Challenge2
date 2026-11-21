@@ -17,49 +17,53 @@ struct HomeView: View {
                 Spacer()
                 
                 VStack(spacing: 4) {
-                    Text("Welcome to Wonderwood!")
-                        .font(.system(size: 50, weight: .bold, design: .rounded))
-                        
-                    Text("Choose a learning adventure:")
-                        .font(.system(size: 32, weight: .medium, design: .rounded))
+                    Text("Welcome to WonderBloom!")
+                        .font(.system(size: 40, weight: .bold, design: .rounded))
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .glassEffect(.regular, in: .capsule)
                 }
-                
-                Spacer()
+                                
+                Image("mascot_genderless_happy")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 350)
+
                 
                 HStack(spacing: 20) {
                     CategoryCard(
                         title: "Words",
-                        mainSymbolText: "Aa",
+                        emoji: "🔡",
                         cardColor: Color(red: 0.35, green: 0.6, blue: 0.9)
                     ) {}
                     
                     CategoryCard(
                         title: "Numbers",
-                        mainSymbolText: "1 2 3",
+                        emoji: "🧠",
                         cardColor: Color(red: 0.45, green: 0.75, blue: 0.3)
                     ) {}
                     
                     CategoryCard(
                         title: "Logic",
-                        mainSymbolText: "",
-                        customCenterIcon: "lightbulb.fill",
+                        emoji: "🧩",
                         cardColor: Color(red: 0.98, green: 0.72, blue: 0.3)
                     ) {}
                     
                     CategoryCard(
                         title: "Creativity",
-                        mainSymbolText: "",
+                        emoji: "🎨",
                         customCenterIcon: "paintpalette.fill",
                         cardColor: Color(red: 0.95, green: 0.5, blue: 0.45)
                     ) {}
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, 10)            
+                .padding(.horizontal, 10)
                 .background(Color.clear)
                 
                 Spacer()
             }
             .padding()
+            
             .background(
                 Image("background")
                     .resizable()
@@ -89,6 +93,15 @@ struct HomeView: View {
                         }
                     }
                 }
+
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationLink {
+                        FlowerAlbumView()
+                    } label: {
+                        Image(systemName: "book.fill")
+                    }
+                    .accessibilityLabel("Flower album")
+                }
             }
         }
     }
@@ -96,4 +109,5 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
+        .environment(FlowerAlbumViewModel())
 }
