@@ -13,10 +13,11 @@ import Observation
 final class HomeViewModel {
     // Add more lines here to vary the welcome.
     static let greetings = [
-        "Hi! I'm Bloomy. Welcome to WonderBloom! Pick a game: \(GameType.spokenList).",
-        "Hi friend! Let's make our garden bloom. What do you want to play?",
-        "Welcome back! Ready to play?",
-        "Let's grow some flowers today! Pick a game.",
+        // Short sentences with commas: the synthesizer follows punctuation for its pauses.
+        "Hi there, friend! I'm Bloomy. Welcome to WonderBloom! Let's pick a game together. We can try, \(GameType.spokenList).",
+        "Hi, friend! Let's help our garden grow. Which game should we try first?",
+        "Yay, you're back! Let's grow some flowers today. Pick any game you like!",
+        "Hello, hello! I'm so happy to see you. Tap a picture, and let's have some fun!",
     ]
 
     // Chosen once, so the replay button repeats what the child just heard.

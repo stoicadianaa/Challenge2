@@ -86,18 +86,11 @@ struct HomeView: View {
 
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .principal) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button(action: homeViewModel.replayGreeting) {
                         Image(systemName: "speaker.wave.2.fill")
                     }
                     .accessibilityLabel("Hear the welcome again")
-                }
-
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                    } label: {
-                        Image(systemName: "gearshape.fill")
-                    }
                 }
                 
                 ToolbarItem(placement: .topBarLeading) {
