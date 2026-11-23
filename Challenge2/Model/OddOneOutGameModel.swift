@@ -28,8 +28,8 @@ struct OddOneOutGameModel {
         index == oddIndex ? odd : common
     }
 
-    // Picks which item is the odd one, where it goes and the color. Called when a game starts,
-    // so playing the same puzzle twice doesn't look the same.
+    // Picks which item is the odd one, where it goes and the color.
+    //Called when a game starts, so playing the same puzzle twice doesn't look the same.
     mutating func shuffle() {
         if Bool.random() { (common, odd) = (odd, common) }
         oddIndex = Int.random(in: 0..<Self.tileCount)

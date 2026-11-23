@@ -67,8 +67,6 @@ struct OddOneOutView: View {
         .controlSize(.extraLarge)
     }
 
-    // MARK: The four tiles
-
     private var tiles: some View {
         HStack(spacing: 28) {
             ForEach(0..<OddOneOutGameModel.tileCount, id: \.self) { index in
