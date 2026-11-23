@@ -36,9 +36,9 @@ enum PlantStage: Int, CaseIterable {
 
     var image: String {
         switch self {
-        case .seed:    return "flower_step1"
-        case .sprout:  return "flower_step2"
-        case .growing: return "flower_step3"
+        case .seed:    return "flower_step_1"
+        case .sprout:  return "flower_step_2"
+        case .growing: return "flower_step_3"
         case .flower:  return "flower_tulip" //this step needs to be changed ofter a flower is completed!
         }
     }

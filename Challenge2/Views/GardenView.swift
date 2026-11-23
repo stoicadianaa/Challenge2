@@ -86,7 +86,7 @@ struct GardenView: View {
                         .saturation(reached ? 1 : 0)
                         .opacity(reached ? 1 : 0.45)
                         .padding(14)
-                        .frame(width: 84, height: 84)
+                        .frame(width: 100, height: 100)
                         .glassEffect(.regular, in: .circle)
                         .overlay {
                             Circle()
@@ -164,7 +164,7 @@ struct GardenView: View {
                 Image(next.image)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 60)
+                    .frame(height: 80)
                     .saturation(0)
                     .opacity(0.6)
 
@@ -181,13 +181,10 @@ struct GardenView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .foregroundStyle(.brown)
+        .foregroundStyle(.secondary)
         .padding(20)
         .frame(width: 240)
-        .background(
-            Color(red: 0.98, green: 0.88, blue: 0.66),
-            in: RoundedRectangle(cornerRadius: 20)
-        )
+        .glassEffect(.regular, in:.capsule)
     }
 }
 
