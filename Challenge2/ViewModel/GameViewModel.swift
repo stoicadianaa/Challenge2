@@ -8,7 +8,7 @@
 import Foundation
 
 final class GameViewModel {
-    let games: [Game] = [
+    private let orderingGames: [Game] = [
         // MARK: Ordering - Easy
         Game(difficulty: .easy, content: .ordering(
             OrderingGameModel(title: "How does a chick grow up?", elements: [
@@ -80,9 +80,16 @@ final class GameViewModel {
         // MARK: Ordering - Hard
         // (none yet - add games with `difficulty: .hard`)
 
-        // MARK: Math / Memory / Words
+        // MARK: Math / Memory
         // (future game types go here)
     ]
+
+    // MARK: Words - Word Match: every question is one game
+    private let wordMatchGames: [Game] = WordMatchQuestion.all.map {
+        Game(difficulty: .easy, content: .wordMatch($0))
+    }
+
+    var games: [Game] { orderingGames + wordMatchGames }
 
     func games(type: GameType, difficulty: Difficulty) -> [Game] {
         games.filter { $0.type == type && $0.difficulty == difficulty }

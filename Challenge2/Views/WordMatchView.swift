@@ -10,31 +10,32 @@ struct WordMatchView: View {
 
     @State private var viewModel: WordMatchViewModel
 
-    // onReward is called once, at the end of the game
-    init(onReward: @escaping (Int) -> Void = { _ in }) {
-        _viewModel = State(initialValue: WordMatchViewModel(onReward: onReward))
+    // Called when the child finds the word. The session decides what happens next.
+    let onCorrect: () -> Void
+
+    init(question: WordMatchQuestion, onCorrect: @escaping () -> Void) {
+        _viewModel = State(initialValue: WordMatchViewModel(question: question))
+        self.onCorrect = onCorrect
     }
 
     var body: some View {
-        VStack(spacing: 20) {
+        // One centered group with even spacing; the two Spacers share the leftover room
+        VStack(spacing: 24) {
+            Spacer()
+
             instruction
             emojiCard
             choices
-            feedback
 
-            HStack(spacing: 24) {
-                Image("mascot_genderless_neutral")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 160)
-                    .accessibilityHidden(true)
-                    
-                nextButton
-            }
+            Spacer()
         }
         .padding(.horizontal, 32)
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The mascot floats above the game; its bubble may cover the content
+        .overlay(alignment: .bottomLeading) {
+            mascot
+        }
         .background {
             Image("background")
                 .resizable()
@@ -42,35 +43,39 @@ struct WordMatchView: View {
                 .ignoresSafeArea()
                 .accessibilityHidden(true)
         }
-        .navigationTitle("Word Match")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Label("\(viewModel.score) / \(viewModel.questions.count)", systemImage: "star.fill")
-                    .foregroundStyle(.primary)
-                    .accessibilityLabel("Score: \(viewModel.score) of \(viewModel.questions.count)")
-            }
+        // After a correct answer, let the mascot finish talking, then hand over to the session.
+        // The task is cancelled automatically if the screen closes first.
+        .task(id: viewModel.selectedAnswer) {
+            guard viewModel.isAnswered else { return }
+            await viewModel.waitUntilMascotIsQuiet()
+            try? await Task.sleep(for: .seconds(0.5))  // a beat to enjoy the praise
+            guard !Task.isCancelled else { return }
+            onCorrect()
         }
-        .sensoryFeedback(.success, trigger: viewModel.selectedAnswer) { _, new in new != nil }
-        .sensoryFeedback(.error, trigger: viewModel.wrongAnswers.count) { old, new in new > old }
-        .fullScreenCover(isPresented: $viewModel.showReward, onDismiss: viewModel.restart) {
-            RewardScreen()
+        .sensoryFeedback(.success, trigger: viewModel.selectedAnswer) {
+            _,
+            new in new != nil
+        }
+        .sensoryFeedback(.error, trigger: viewModel.wrongAnswers.count) {
+            old,
+            new in new > old
         }
     }
-    
+
     private var instruction: some View {
         VStack(spacing: 12) {
-            Button("Find the correct word!", systemImage: "speaker.wave.2.fill") {
-                viewModel.speak("Find the correct word!")
+            Button("Find the correct word!", systemImage: "speaker.wave.2.fill")
+            {
+                viewModel.speakInstruction()
             }
             .font(.system(.title2, design: .rounded, weight: .bold))
             .buttonStyle(.glass)
             .controlSize(.extraLarge)
 
-            ProgressView(value: viewModel.progress)
-                .tint(.green)
-                .frame(width: 300)
-                .accessibilityLabel("Progress")
+//            ProgressView(value: viewModel.progress)
+//                .tint(.green)
+//                .frame(width: 300)
+//                .accessibilityLabel("Progress")
         }
     }
 
@@ -84,19 +89,24 @@ struct WordMatchView: View {
 
     private var choices: some View {
         HStack(spacing: 20) {
-            ForEach(Array(viewModel.question.choices.enumerated()), id: \.element) { index, choice in
+            ForEach(
+                Array(viewModel.question.choices.enumerated()),
+                id: \.element
+            ) { index, choice in
                 Button {
                     viewModel.choose(choice)
                 } label: {
                     Text(choice)
-                        .font(.system(.title2, design: .rounded, weight: .heavy))
+                        .font(
+                            .system(.title2, design: .rounded, weight: .heavy)
+                        )
                         .frame(minWidth: 150)
                 }
                 .buttonStyle(.glassProminent)
                 .tint(tint(for: choice, at: index))
                 .controlSize(.extraLarge)
-                .disabled(viewModel.wrongAnswers.contains(choice))   // a wrong word can't be tapped again
-                .allowsHitTesting(!viewModel.isAnswered)             // once found, the others are locked
+                .disabled(viewModel.wrongAnswers.contains(choice))  // a wrong word can't be tapped again
+                .allowsHitTesting(!viewModel.isAnswered)  // once found, the others are locked
             }
         }
     }
@@ -107,30 +117,14 @@ struct WordMatchView: View {
         return [Color.blue, .teal, .orange][index % 3]
     }
 
-
-    private var feedback: some View {
-        Text(viewModel.feedback)
-            .font(.system(.title3, design: .rounded, weight: .bold))
-            .padding(.horizontal, 24)
-            .padding(.vertical, 10)
-            .glassEffect(.regular, in: .capsule)
-            .animation(.default, value: viewModel.feedback)
-    }
-
-    private var nextButton: some View {
-        Button(viewModel.isLastQuestion ? "Finish" : "Next", systemImage: "arrow.right") {
-            viewModel.next()
+    // The bubble shows exactly while the mascot speaks; the view model decides when
+    private var mascot: some View {
+        MascotView(mascot: viewModel.mascot, message: viewModel.mascotLine) {
+            viewModel.encourage()
         }
-        .buttonStyle(.glassProminent)
-        .tint(.green)
-        .controlSize(.extraLarge)
-        .opacity(viewModel.isAnswered ? 1 : 0)
-        .disabled(!viewModel.isAnswered)
-        .accessibilityHidden(!viewModel.isAnswered)
-        .animation(.default, value: viewModel.isAnswered)
     }
 }
 
-#Preview() {
-    WordMatchView()
+#Preview {
+    WordMatchView(question: WordMatchQuestion.all[0], onCorrect: {})
 }

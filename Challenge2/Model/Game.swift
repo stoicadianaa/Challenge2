@@ -17,10 +17,12 @@ struct Game: Identifiable {
     var type: GameType {
         switch content {
         case .ordering: .logic
+        case .wordMatch: .words
         }
     }
 }
 
 enum GameContent {
     case ordering(OrderingGameModel)
+    case wordMatch(WordMatchQuestion)
 }

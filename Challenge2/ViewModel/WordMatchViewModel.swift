@@ -6,38 +6,48 @@
 //
 
 import SwiftUI
-import AVFoundation
 
+// One Word Match game = one question. The session decides what comes next.
+@MainActor
 @Observable
 final class WordMatchViewModel {
 
-    let questions = WordMatchQuestion.all
+    let question: WordMatchQuestion
+    let mascot: Mascot
 
-    var currentIndex = 0
-    var score = 0                        // questions answered correctly at the first try
     var selectedAnswer: String?          // set when the child finds the right word
-    var wrongAnswers: Set<String> = []   // wrong words already tried in this question
-    var showReward = false
+    var wrongAnswers: Set<String> = []   // wrong words already tried
 
-    private let onReward: (Int) -> Void
-    private let synthesizer = AVSpeechSynthesizer()
+    // What the mascot is saying right now. The bubble shows exactly this, so it is
+    // visible for the whole time the line is spoken and never when nothing is said.
+    private(set) var mascotLine: String?
 
-    init(onReward: @escaping (Int) -> Void = { _ in }) {
-        self.onReward = onReward
+    @ObservationIgnored private let speaker: Speaking
+    @ObservationIgnored private var lastEncouragement: String?
+    @ObservationIgnored private var pendingLines: [String] = []   // waiting for their turn
+    @ObservationIgnored private var speechTask: Task<Void, Never>?
+
+    // `mascot` and `speaker` are optional and resolved in the body: a default argument
+    // such as `.neutral` or `Speaker.shared` is evaluated outside the main actor.
+    init(
+        question: WordMatchQuestion,
+        mascot: Mascot? = nil,
+        speaker: Speaking? = nil
+    ) {
+        self.question = question
+        self.mascot = mascot ?? .neutral
+        self.speaker = speaker ?? Speaker.shared
     }
 
-    var question: WordMatchQuestion { questions[currentIndex] }
     var isAnswered: Bool { selectedAnswer != nil }
-    var isLastQuestion: Bool { currentIndex == questions.count - 1 }
 
-    var progress: Double {
-        Double(currentIndex + (isAnswered ? 1 : 0)) / Double(questions.count)
-    }
-
-    var feedback: String {
-        if isAnswered { return "Amazing! Well done!" }
-        if !wrongAnswers.isEmpty { return "Try again! You can do it!" }
-        return "Choose the matching word!"
+    // The mascot's reply to a tap. Ignored while the mascot (or the instruction)
+    // is still talking, so a tap can never cut a line short.
+    func encourage() {
+        guard mascotLine == nil, pendingLines.isEmpty, !speaker.isSpeaking else { return }
+        let message = mascot.encouragement(avoiding: lastEncouragement)
+        lastEncouragement = message
+        say(message)
     }
 
     func choose(_ choice: String) {
@@ -45,38 +55,41 @@ final class WordMatchViewModel {
 
         if choice == question.word {
             selectedAnswer = choice
-            if wrongAnswers.isEmpty { score += 1 }
-            speak("Amazing! Well done!")
+            say("Amazing! Well done!")
         } else {
             wrongAnswers.insert(choice)
-            speak("Try again!")
+            say("Try again! You can do it!")
         }
     }
 
-    func next() {
-        if isLastQuestion {
-            onReward(1)
-            showReward = true
-            return
+    // The instruction button. It has no bubble, so it waits while the mascot is talking.
+    func speakInstruction() {
+        guard mascotLine == nil else { return }
+        speaker.say("Find the correct word!")
+    }
+
+    /// Returns once the mascot has finished everything it had to say.
+    func waitUntilMascotIsQuiet() async {
+        await speechTask?.value
+    }
+
+    // MARK: Mascot speech
+
+    // Lines never overwrite each other: a new line waits until the current one is finished.
+    private func say(_ line: String) {
+        guard line != mascotLine, !pendingLines.contains(line) else { return }
+        pendingLines.append(line)
+        guard speechTask == nil else { return }
+        speechTask = Task { await speakPendingLines() }
+    }
+
+    private func speakPendingLines() async {
+        while !pendingLines.isEmpty {
+            let line = pendingLines.removeFirst()
+            mascotLine = line               // bubble appears...
+            await speaker.sayAndWait(line)  // ...stays for the whole line...
+            mascotLine = nil                // ...and goes when the line is done
         }
-        currentIndex += 1
-        selectedAnswer = nil
-        wrongAnswers = []
-    }
-
-    func restart() {
-        currentIndex = 0
-        score = 0
-        selectedAnswer = nil
-        wrongAnswers = []
-    }
-
-    func speak(_ text: String) {
-        synthesizer.stopSpeaking(at: .immediate)
-
-        let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = 0.45
-        synthesizer.speak(utterance)
+        speechTask = nil
     }
 }
