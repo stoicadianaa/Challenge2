@@ -4,22 +4,26 @@ struct FlowerCardView: View {
     let flower: Flower
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 26)
-            .fill(Color(.systemBackground))
-            .shadow(color: .brown.opacity(0.16), radius: 3, y: 4)
-            .aspectRatio(4 / 3, contentMode: .fit)
+        Color.clear
+           .aspectRatio(4 / 3, contentMode: .fit)
             .overlay {
                 flowerContent
-                    .padding(20)
+                    .padding(8)
             }
             .overlay(alignment: .bottomTrailing) {
                 if !flower.isUnlocked {
                     Image(systemName: "lock.fill")
-                        .font(.title.bold())
-                        .foregroundStyle(.brown.opacity(0.75))
-                        .padding(14)
+                        .font(.headline)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 40, height: 40)
+                        .glassEffect(.regular, in: .circle)
+                        .padding(10)
                 }
             }
+            .glassEffect(
+                flower.isUnlocked ? .regular.tint(.green.opacity(0.12)) : .regular,
+                  in: .rect(cornerRadius: 26)
+            )
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(
                 flower.isUnlocked ? "\(flower.name), unlocked" : "Locked flower"
@@ -37,13 +41,13 @@ struct FlowerCardView: View {
     private var flowerContent: some View {
         if flower.isUnlocked {
             flowerImage
-        } else {
-            Color.brown
-                .opacity(0.3)
+            } else {
+            Color.secondary
+                .opacity(0.35)
                 .mask { flowerImage }
+            }
         }
     }
-}
 
 #Preview {
     HStack {
