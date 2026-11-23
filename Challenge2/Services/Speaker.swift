@@ -12,7 +12,10 @@ import AVFoundation
 /// `Speaker`, so tests can pass a fake that makes no sound.
 @MainActor
 protocol Speaking {
+    var isSpeaking: Bool { get }
     func say(_ text: String)
+    /// Says the phrase and returns only once it has been spoken to the end (or cancelled).
+    func sayAndWait(_ text: String) async
 }
 
 @MainActor
@@ -37,6 +40,9 @@ final class Speaker: Speaking {
     private var currentUtterance: AVSpeechUtterance?
     private let delegate = SpeechDelegate()
 
+    /// True from the moment `say` is called until the phrase finishes or is cancelled.
+    var isSpeaking: Bool { speakingText != nil }
+
     private init() {
         synthesizer.delegate = delegate
         delegate.onEnd = { [weak self] id in self?.speechEnded(id) }
@@ -59,6 +65,19 @@ final class Speaker: Speaking {
         synthesizer.speak(utterance)
     }
 
+    // Callers suspended in `sayAndWait`, keyed by the utterance they wait for.
+    private var waiters: [ObjectIdentifier: [CheckedContinuation<Void, Never>]] = [:]
+
+    func sayAndWait(_ text: String) async {
+        say(text)
+        // `say` ignores a phrase that is already being spoken; then we simply wait for that one.
+        guard speakingText == text, let utterance = currentUtterance else { return }
+        let id = ObjectIdentifier(utterance)
+        await withCheckedContinuation { continuation in
+            waiters[id, default: []].append(continuation)
+        }
+    }
+
     func stop() {
         synthesizer.stopSpeaking(at: .immediate)
         speakingText = nil
@@ -68,6 +87,8 @@ final class Speaker: Speaking {
     // Called when an utterance finishes or is cancelled. A cancelled *old* utterance
     // reports in after the new one has started, so only the current one may clear the state.
     private func speechEnded(_ id: ObjectIdentifier) {
+        // Release whoever waits for this utterance, even if a newer one replaced it.
+        waiters.removeValue(forKey: id)?.forEach { $0.resume() }
         guard let current = currentUtterance, ObjectIdentifier(current) == id else { return }
         speakingText = nil
         currentUtterance = nil
