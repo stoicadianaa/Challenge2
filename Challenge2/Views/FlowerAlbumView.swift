@@ -1,39 +1,22 @@
 import SwiftUI
 
 struct FlowerAlbumView: View {
-    @Environment(FlowerAlbumViewModel.self) private var viewModel
+    // imageName of the flowers the child has unlocked.
+    let unlockedFlowers: [String]
+
+    private var isComplete: Bool { unlockedFlowers.count >= Flower.catalog.count }
+
+    private var flowers: [Flower] { Flower.album(unlocked: unlockedFlowers) }
 
     // Always 4 cards per row, so the cards are smaller than with an adaptive grid.
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 4)
-
-    // TEMPORARY: only for previewing how the screen looks when it is filled.
-    // Remove once the view model has enough real flowers.
-    private let placeholderTotal = 20
-
-    private var placeholderCount: Int {
-        guard !viewModel.flowers.isEmpty else { return 0 }
-        return max(0, placeholderTotal - viewModel.flowers.count)
-    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(viewModel.flowers) { flower in
+                    ForEach(flowers) { flower in
                         FlowerCardView(flower: flower)
-                    }
-
-                    // TEMPORARY: extra locked cards, just to see how the screen looks filled.
-                    // They reuse the real flowers' images and are not part of the data.
-                    ForEach(0..<placeholderCount, id: \.self) { index in
-                        let source = viewModel.flowers[index % viewModel.flowers.count]
-                        FlowerCardView(
-                            flower: Flower(
-                                imageName: source.imageName,
-                                name: "Placeholder",
-                                isUnlocked: false
-                            )
-                        )
                     }
                 }
             }
@@ -50,9 +33,12 @@ struct FlowerAlbumView: View {
         }
         .overlay(alignment: .bottomTrailing) {
             VStack(alignment: .trailing, spacing: -6) {
-                AlbumSpeechBubble(text: "Play more games to unlock new flowers!")
+                AlbumSpeechBubble(
+                    text: isComplete
+                        ? "You found all the flowers!"
+                        : "Play more games to unlock new flowers!")
                 
-                Image("mascot_genderless_happy")
+                Image(isComplete ? "mascot_genderless_celebrating" : "mascot_genderless_happy")
                     .resizable()
                     .scaledToFit()
                     .frame(height: 170)
@@ -121,7 +107,6 @@ private struct AlbumSpeechBubble: View {
 
 #Preview {
     NavigationStack {
-        FlowerAlbumView()
+        FlowerAlbumView(unlockedFlowers: ["flower_daisy", "flower_poppy"])
     }
-    .environment(FlowerAlbumViewModel())
 }

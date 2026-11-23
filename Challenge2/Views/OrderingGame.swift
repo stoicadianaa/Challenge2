@@ -15,6 +15,15 @@ struct OrderingGame: View {
     // Called when the order is correct. The session decides what happens next.
     let onCorrect: (GameResult) -> Void
 
+    // 3-4 items keep the big emoji; 5 and 6 shrink so the row still fits the screen.
+    private var emojiSize: CGFloat {
+        switch game.elements.count {
+        case ...4: 180
+        case 5: 130
+        default: 110
+        }
+    }
+
     var body: some View {
         VStack {
             Spacer()
@@ -32,7 +41,7 @@ struct OrderingGame: View {
 
             Spacer()
 
-            HStack(spacing: 32) {
+            HStack(spacing: game.elements.count > 4 ? 16 : 32) {
                 ForEach(game.elements) { element in
                     Text(element.emoji)
                         .padding()
@@ -41,7 +50,7 @@ struct OrderingGame: View {
                 .reorderable()
             }
             .frame(maxWidth: .infinity)
-            .font(.system(size: 180))
+            .font(.system(size: emojiSize))
             .reorderContainer(for: OrderingGameItem.self) { difference in
                 game.apply(difference)
                 showTryAgain = false

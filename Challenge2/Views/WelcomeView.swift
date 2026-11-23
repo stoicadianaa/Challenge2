@@ -17,7 +17,11 @@ struct WelcomeView: View {
 
     var body: some View {
         if let profile = selectedProfile {
-            HomeView(profile: profile, onChange: store.update)
+            HomeView(
+                profile: profile,
+                onChange: store.update,
+                onSwitchProfile: { selectedProfile = nil }
+            )
         } else if hasStarted {
             ProfileSelectionView(store: store) { selectedProfile = $0 }
         } else {

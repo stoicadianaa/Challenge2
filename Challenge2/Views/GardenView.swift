@@ -11,9 +11,14 @@ struct GardenView: View {
 
     @State private var viewModel: GardenViewModel
 
-    init(waterDrops: Int, plantDrops: Int, onChange: @escaping (Int, Int) -> Void) {
+    init(
+        waterDrops: Int, plantDrops: Int, unlockedFlowers: [String],
+        onChange: @escaping (Int, Int) -> Void,
+        onFlowerCompleted: @escaping () -> [String]
+    ) {
         _viewModel = State(initialValue: GardenViewModel(
-            availableDrops: waterDrops, plantDrops: plantDrops, onChange: onChange))
+            availableDrops: waterDrops, plantDrops: plantDrops, unlockedFlowers: unlockedFlowers,
+            onChange: onChange, onFlowerCompleted: onFlowerCompleted))
     }
 
     var body: some View {
@@ -178,10 +183,12 @@ struct GardenView: View {
                         .system(size: 20, weight: .semibold, design: .rounded)
                     )
             } else {
-                Text("Full bloom!")
+                Text(viewModel.albumComplete ? "You found them all!" : "Full bloom!")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
 
-                Text("You grew a beautiful flower!")
+                Text(viewModel.albumComplete
+                     ? "Every flower is in your album!"
+                     : "You grew a beautiful flower!")
                     .font(.system(size: 18, weight: .medium))
                     .multilineTextAlignment(.center)
             }
@@ -195,6 +202,6 @@ struct GardenView: View {
 
 #Preview {
     NavigationStack {
-        GardenView(waterDrops: 5, plantDrops: 0) { _, _ in }
+        GardenView(waterDrops: 5, plantDrops: 0, unlockedFlowers: [], onChange: { _, _ in }, onFlowerCompleted: { ["flower_daisy"] })
     }
 }

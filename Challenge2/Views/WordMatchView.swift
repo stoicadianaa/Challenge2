@@ -100,6 +100,8 @@ struct WordMatchView: View {
                         .font(
                             .system(.title2, design: .rounded, weight: .heavy)
                         )
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                         .frame(minWidth: 150)
                 }
                 .buttonStyle(.glassProminent)

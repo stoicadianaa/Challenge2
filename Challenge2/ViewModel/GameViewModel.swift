@@ -78,15 +78,57 @@ final class GameViewModel {
             ]))),
 
         // MARK: Ordering - Hard
-        // (none yet - add games with `difficulty: .hard`)
+        // 5-6 items: the ordering screen shrinks the emoji to fit.
+        Game(difficulty: .hard, content: .ordering(
+            OrderingGameModel(title: "Put in order from the smallest to the biggest", elements: [
+                OrderingGameItem(emoji: "🐜", order: 0),
+                OrderingGameItem(emoji: "🐭", order: 1),
+                OrderingGameItem(emoji: "🐈", order: 2),
+                OrderingGameItem(emoji: "🐕", order: 3),
+                OrderingGameItem(emoji: "🐘", order: 4),
+                OrderingGameItem(emoji: "🐋", order: 5),
+            ]))),
+        Game(difficulty: .hard, content: .ordering(
+            OrderingGameModel(title: "Put the day in order, from sunrise to bedtime", elements: [
+                OrderingGameItem(emoji: "🌅", order: 0),
+                OrderingGameItem(emoji: "☀️", order: 1),
+                OrderingGameItem(emoji: "🌇", order: 2),
+                OrderingGameItem(emoji: "🌃", order: 3),
+                OrderingGameItem(emoji: "🛌", order: 4),
+            ]))),
+        Game(difficulty: .hard, content: .ordering(
+            OrderingGameModel(title: "What happens to a flower, first to last?", elements: [
+                OrderingGameItem(emoji: "🌰", order: 0),
+                OrderingGameItem(emoji: "🌱", order: 1),
+                OrderingGameItem(emoji: "🌿", order: 2),
+                OrderingGameItem(emoji: "🌷", order: 3),
+                OrderingGameItem(emoji: "🍂", order: 4),
+            ]))),
+        Game(difficulty: .hard, content: .ordering(
+            OrderingGameModel(title: "Put the numbers in order, from 1 to 5", elements: [
+                OrderingGameItem(emoji: "1️⃣", order: 0),
+                OrderingGameItem(emoji: "2️⃣", order: 1),
+                OrderingGameItem(emoji: "3️⃣", order: 2),
+                OrderingGameItem(emoji: "4️⃣", order: 3),
+                OrderingGameItem(emoji: "5️⃣", order: 4),
+            ]))),
+        Game(difficulty: .hard, content: .ordering(
+            OrderingGameModel(title: "Which is slowest? Order them like a race, slowest first", elements: [
+                OrderingGameItem(emoji: "🐌", order: 0),
+                OrderingGameItem(emoji: "🐢", order: 1),
+                OrderingGameItem(emoji: "🚲", order: 2),
+                OrderingGameItem(emoji: "🚗", order: 3),
+                OrderingGameItem(emoji: "🚄", order: 4),
+                OrderingGameItem(emoji: "✈️", order: 5),
+            ]))),
 
         // MARK: Math / Memory
         // (future game types go here)
     ]
 
-    // MARK: Words - Word Match: every question is one game
+    // MARK: Words - Word Match: every question is one game, at the difficulty it declares
     private let wordMatchGames: [Game] = WordMatchQuestion.all.map {
-        Game(difficulty: .easy, content: .wordMatch($0))
+        Game(difficulty: $0.difficulty, content: .wordMatch($0))
     }
 
     var games: [Game] { orderingGames + wordMatchGames }

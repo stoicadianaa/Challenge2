@@ -15,13 +15,17 @@ struct HomeView: View {
     // to the owner (ProfileStore) to be saved.
     @State private var profile: ChildProfile
     private let onChange: (ChildProfile) -> Void
+    // Goes back to "Who's playing?". Everything is already saved, so nothing is lost.
+    private let onSwitchProfile: () -> Void
 
     init(
         profile: ChildProfile = ChildProfile(name: "", avatar: ""),
-        onChange: @escaping (ChildProfile) -> Void = { _ in }
+        onChange: @escaping (ChildProfile) -> Void = { _ in },
+        onSwitchProfile: @escaping () -> Void = {}
     ) {
         _profile = State(initialValue: profile)
         self.onChange = onChange
+        self.onSwitchProfile = onSwitchProfile
     }
 
     private func save(_ change: (inout ChildProfile) -> Void) {
@@ -108,6 +112,13 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: onSwitchProfile) {
+                        Image(systemName: "person.2.fill")
+                    }
+                    .accessibilityLabel("Change player")
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
                     Button(action: homeViewModel.replayGreeting) {
                         Image(systemName: "speaker.wave.2.fill")
                     }
@@ -116,9 +127,16 @@ struct HomeView: View {
                 
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
-                        GardenView(waterDrops: profile.waterDrops, plantDrops: profile.plantDrops) {
+                        GardenView(
+                            waterDrops: profile.waterDrops,
+                            plantDrops: profile.plantDrops,
+                            unlockedFlowers: profile.unlockedFlowers
+                        ) {
                             water, plant in
                             save { $0.waterDrops = water; $0.plantDrops = plant }
+                        } onFlowerCompleted: {
+                            save { $0.unlockNextFlower() }
+                            return profile.unlockedFlowers
                         }
                     } label: {
                         HStack(spacing: 8) {
@@ -135,7 +153,7 @@ struct HomeView: View {
 
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
-                        FlowerAlbumView()
+                        FlowerAlbumView(unlockedFlowers: profile.unlockedFlowers)
                     } label: {
                         Image(systemName: "book.fill")
                     }
@@ -148,5 +166,4 @@ struct HomeView: View {
 
 #Preview {
     HomeView()
-        .environment(FlowerAlbumViewModel())
 }
