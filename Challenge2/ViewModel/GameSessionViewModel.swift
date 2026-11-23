@@ -2,8 +2,9 @@
 //  GameSessionViewModel.swift
 //  Challenge2
 //
-//  Runs one play session: which game is current, when the session is over and
-//  how many drops it earned. The view only shows the current screen.
+//  Runs one play session in one category: picks each game from the child's
+//  current level, records how it went, and ends after `gameCount` games.
+//  The view only shows the current screen.
 //
 
 import Foundation
@@ -12,40 +13,57 @@ import Observation
 @MainActor
 @Observable
 final class GameSessionViewModel {
-    // The games actually played: the first `gameCount` of the category, easy -> hard.
-    private let playlist: [Game]
-    // Tells the home screen how many drops were earned so it can update its counter.
+    private let type: GameType
+    private let games: GameViewModel
+    private let gameCount: Int
+    // Tell the owner of the profile to save the new progress / add the earned drops.
+    @ObservationIgnored private let onProgressChange: (SkillProgress) -> Void
     @ObservationIgnored private let onFinish: (Int) -> Void
 
-    private(set) var index = 0
+    private(set) var progress: SkillProgress
+    private(set) var currentGame: Game?
+    private(set) var gamesPlayed = 0
+    private(set) var dropsEarned = 0
     private(set) var isFinished = false
 
     /// - Parameters:
-    ///   - games: all games of the category, already sorted easy -> hard.
-    ///   - gameCount: how many games this session plays. If the category has
-    ///     fewer, it plays what exists.
-    init(games: [Game], gameCount: Int = 1, onFinish: @escaping (_ drops: Int) -> Void) {
-        self.playlist = Array(games.prefix(gameCount))
+    ///   - progress: the child's progress in this category.
+    ///   - gameCount: how many games this session plays.
+    init(
+        type: GameType,
+        games: GameViewModel,
+        progress: SkillProgress,
+        gameCount: Int = 1,
+        onProgressChange: @escaping (SkillProgress) -> Void,
+        onFinish: @escaping (_ drops: Int) -> Void
+    ) {
+        self.type = type
+        self.games = games
+        self.progress = progress
+        self.gameCount = gameCount
+        self.onProgressChange = onProgressChange
         self.onFinish = onFinish
-    }
-
-    /// The game to show, or nil when the session is over (or has no games).
-    var currentGame: Game? {
-        guard !isFinished, playlist.indices.contains(index) else { return nil }
-        return playlist[index]
-    }
-
-    /// What this session is worth: the sum of what each game declares.
-    var dropsEarned: Int {
-        playlist.map(\.drops).reduce(0, +)
+        self.currentGame = games.nextGame(type: type, progress: progress)
+        // A category with no games has nothing to play.
+        if currentGame == nil { isFinished = true }
     }
 
     /// Call when the child solves the current game.
-    func gameCompleted() {
-        guard !isFinished else { return }
-        if index + 1 < playlist.count {
-            index += 1
+    func gameCompleted(_ result: GameResult) {
+        guard !isFinished, let game = currentGame else { return }
+
+        // Level changes now, so the next game of this session already uses it.
+        progress.record(result)
+        progress.markPlayed(game.key)
+        onProgressChange(progress)
+
+        dropsEarned += game.drops
+        gamesPlayed += 1
+
+        if gamesPlayed < gameCount, let next = games.nextGame(type: type, progress: progress) {
+            currentGame = next
         } else {
+            currentGame = nil
             isFinished = true
             // Added now, not on Continue, so leaving the reward screen can't lose it.
             onFinish(dropsEarned)

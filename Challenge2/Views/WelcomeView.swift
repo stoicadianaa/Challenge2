@@ -4,6 +4,10 @@ struct WelcomeView: View {
     // Start moves on to the home screen; the app itself doesn't need to know.
     @State private var hasStarted = false
 
+    // One store for the whole app session; the chosen child decides whose progress is played.
+    @StateObject private var store = ProfileStore()
+    @State private var selectedProfile: ChildProfile?
+
     @State private var floating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showBubble = false
@@ -12,8 +16,10 @@ struct WelcomeView: View {
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
 
     var body: some View {
-        if hasStarted {
-            HomeView()
+        if let profile = selectedProfile {
+            HomeView(profile: profile, onChange: store.update)
+        } else if hasStarted {
+            ProfileSelectionView(store: store) { selectedProfile = $0 }
         } else {
             welcome
         }

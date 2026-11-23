@@ -103,6 +103,22 @@ final class GameViewModel {
             .sorted { $0.difficulty < $1.difficulty }
     }
 
-    // TODO (future task): track GameResult / SkillProgress per GameType and
-    // add `record(_ result:)` to move the level up or down.
+    /// The next game for a child: a random one at their level, unseen first.
+    /// If their level has no games, uses the nearest level that has some
+    /// (the easier one wins a tie). Returns nil only if the type has no games at all.
+    func nextGame(type: GameType, progress: SkillProgress) -> Game? {
+        let ofType = games.filter { $0.type == type }
+        let target = progress.level.rawValue
+        guard let level = Set(ofType.map(\.difficulty)).min(by: {
+            (abs($0.rawValue - target), $0.rawValue) < (abs($1.rawValue - target), $1.rawValue)
+        }) else { return nil }
+
+        let candidates = ofType.filter { $0.difficulty == level }
+        let unseen = candidates.filter { !progress.recentlyPlayed.contains($0.key) }
+        if let game = unseen.randomElement() { return game }
+
+        // Everything at this level was played: start over, but not with the game just played.
+        let others = candidates.filter { $0.key != progress.recentlyPlayed.last }
+        return (others.isEmpty ? candidates : others).randomElement()
+    }
 }

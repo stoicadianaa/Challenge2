@@ -33,6 +33,12 @@ final class ProfileStore: ObservableObject {
         profiles.append(profile)
     }
 
+    /// Replaces the stored copy of a profile (the `profiles` observer persists it).
+    func update(_ profile: ChildProfile) {
+        guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else { return }
+        profiles[index] = profile
+    }
+
     func delete(_ profile: ChildProfile) {
         profiles.removeAll { $0.id == profile.id }
     }

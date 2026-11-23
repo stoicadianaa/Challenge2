@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Difficulty: Int, CaseIterable, Identifiable, Comparable {
+enum Difficulty: Int, CaseIterable, Identifiable, Comparable, Codable {
     case easy, medium, hard
 
     var id: Self { self }

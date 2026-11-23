@@ -9,9 +9,16 @@ import SwiftUI
 @Observable
 class GardenViewModel {
 
-    var availableDrops = UserDefaults.standard.integer(forKey: "waterDrops")
+    var availableDrops: Int
+    var plantDrops: Int
+    // Reports the new (availableDrops, plantDrops) so the profile can be saved.
+    @ObservationIgnored private let onChange: (Int, Int) -> Void
 
-    var plantDrops = UserDefaults.standard.integer(forKey: "plantDrops")
+    init(availableDrops: Int, plantDrops: Int, onChange: @escaping (Int, Int) -> Void) {
+        self.availableDrops = availableDrops
+        self.plantDrops = plantDrops
+        self.onChange = onChange
+    }
 
     var stage: PlantStage {
         PlantStage.from(drops: plantDrops)
@@ -38,12 +45,11 @@ class GardenViewModel {
         availableDrops -= 1
         plantDrops += 1
 
-        UserDefaults.standard.set(availableDrops, forKey: "waterDrops")
-        UserDefaults.standard.set(plantDrops, forKey: "plantDrops")
+        onChange(availableDrops, plantDrops)
     }
 
     func restart() {
         plantDrops = 0
-        UserDefaults.standard.set(0, forKey: "plantDrops")
+        onChange(availableDrops, plantDrops)
     }
 }

@@ -14,6 +14,14 @@ struct Game: Identifiable {
     /// Water drops this game is worth when completed.
     var drops = 1
 
+    /// Stable across launches (`id` is a new UUID every time), so it can be saved in SkillProgress.
+    var key: String {
+        switch content {
+        case .ordering(let model): "ordering:" + model.title
+        case .wordMatch(let question): "wordMatch:" + question.word
+        }
+    }
+
     var type: GameType {
         switch content {
         case .ordering: .logic

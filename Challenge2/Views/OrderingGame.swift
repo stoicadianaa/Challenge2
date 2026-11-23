@@ -10,9 +10,10 @@ import SwiftUI
 struct OrderingGame: View {
     @State var game: OrderingGameModel
     @State private var showTryAgain = false
+    @State private var wrongChecks = 0
 
     // Called when the order is correct. The session decides what happens next.
-    let onCorrect: () -> Void
+    let onCorrect: (GameResult) -> Void
 
     var body: some View {
         VStack {
@@ -51,8 +52,9 @@ struct OrderingGame: View {
             Button("Check") {
                 if game.isInCorrectOrder {
                     // Right answer: straight on, the reward screen does the celebrating.
-                    onCorrect()
+                    onCorrect(GameResult(solvedFirstTry: wrongChecks == 0))
                 } else {
+                    wrongChecks += 1
                     showTryAgain = true
                 }
             }
@@ -84,6 +86,6 @@ struct OrderingGame: View {
 #Preview {
     let game = GameViewModel().games(type: .logic, difficulty: .easy).first!
     if case .ordering(let model) = game.content {
-        OrderingGame(game: model, onCorrect: {})
+        OrderingGame(game: model, onCorrect: { _ in })
     }
 }

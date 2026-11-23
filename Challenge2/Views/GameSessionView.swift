@@ -13,10 +13,17 @@ struct GameSessionView: View {
     @State private var viewModel: GameSessionViewModel
     @Environment(\.dismiss) private var dismiss
 
-    // Same parameters as before, so HomeView doesn't change.
-    init(games: [Game], gameCount: Int = 1, onFinish: @escaping (_ drops: Int) -> Void) {
+    init(
+        type: GameType,
+        games: GameViewModel,
+        progress: SkillProgress,
+        gameCount: Int = 1,
+        onProgressChange: @escaping (SkillProgress) -> Void,
+        onFinish: @escaping (_ drops: Int) -> Void
+    ) {
         _viewModel = State(initialValue: GameSessionViewModel(
-            games: games, gameCount: gameCount, onFinish: onFinish))
+            type: type, games: games, progress: progress, gameCount: gameCount,
+            onProgressChange: onProgressChange, onFinish: onFinish))
     }
 
     var body: some View {

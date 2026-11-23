@@ -11,9 +11,9 @@ struct WordMatchView: View {
     @State private var viewModel: WordMatchViewModel
 
     // Called when the child finds the word. The session decides what happens next.
-    let onCorrect: () -> Void
+    let onCorrect: (GameResult) -> Void
 
-    init(question: WordMatchQuestion, onCorrect: @escaping () -> Void) {
+    init(question: WordMatchQuestion, onCorrect: @escaping (GameResult) -> Void) {
         _viewModel = State(initialValue: WordMatchViewModel(question: question))
         self.onCorrect = onCorrect
     }
@@ -50,7 +50,7 @@ struct WordMatchView: View {
             await viewModel.waitUntilMascotIsQuiet()
             try? await Task.sleep(for: .seconds(0.5))  // a beat to enjoy the praise
             guard !Task.isCancelled else { return }
-            onCorrect()
+            onCorrect(GameResult(solvedFirstTry: viewModel.wrongAnswers.isEmpty))
         }
         .sensoryFeedback(.success, trigger: viewModel.selectedAnswer) {
             _,
@@ -126,5 +126,5 @@ struct WordMatchView: View {
 }
 
 #Preview {
-    WordMatchView(question: WordMatchQuestion.all[0], onCorrect: {})
+    WordMatchView(question: WordMatchQuestion.all[0], onCorrect: { _ in })
 }

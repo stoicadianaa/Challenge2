@@ -10,9 +10,9 @@ import UIKit
 
 struct ProfileSelectionView: View {
 
+    // Shared with the screens after this one, so progress saved there isn't overwritten here.
+    @ObservedObject var store: ProfileStore
     var onSelect: (ChildProfile) -> Void = { _ in }
-
-    @StateObject private var store = ProfileStore()
     @State private var showCreator = false
     @State private var profileToDelete: ChildProfile?
     @State private var appeared = false
@@ -169,5 +169,5 @@ struct ProfileSelectionView: View {
 }
 
 #Preview {
-    ProfileSelectionView()
+    ProfileSelectionView(store: ProfileStore())
 }

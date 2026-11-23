@@ -8,9 +8,26 @@
 import SwiftUI
 
 struct HomeView: View {
-    @AppStorage("waterDrops") private var waterDropsCount = 0
-    
+
     @State private var homeViewModel = HomeViewModel()
+
+    // The child playing: levels, water drops and plant. Every change goes back
+    // to the owner (ProfileStore) to be saved.
+    @State private var profile: ChildProfile
+    private let onChange: (ChildProfile) -> Void
+
+    init(
+        profile: ChildProfile = ChildProfile(name: "", avatar: ""),
+        onChange: @escaping (ChildProfile) -> Void = { _ in }
+    ) {
+        _profile = State(initialValue: profile)
+        self.onChange = onChange
+    }
+
+    private func save(_ change: (inout ChildProfile) -> Void) {
+        change(&profile)
+        onChange(profile)
+    }
 
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
 
@@ -75,9 +92,13 @@ struct HomeView: View {
             .navigationDestination(item: $selectedType) { type in
                 // Plays 1 game by default; pass `gameCount:` for longer sessions.
                 // Each game played earns 1 drop.
-                GameSessionView(games: viewModel.games(for: type)) { drops in
-                    waterDropsCount += drops
-                }
+                GameSessionView(
+                    type: type,
+                    games: viewModel,
+                    progress: profile.progress[type] ?? SkillProgress(),
+                    onProgressChange: { updated in save { $0.progress[type] = updated } },
+                    onFinish: { drops in save { $0.waterDrops += drops } }
+                )
             }
 
             .onAppear {
@@ -95,18 +116,21 @@ struct HomeView: View {
                 
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
-                        GardenView()
+                        GardenView(waterDrops: profile.waterDrops, plantDrops: profile.plantDrops) {
+                            water, plant in
+                            save { $0.waterDrops = water; $0.plantDrops = plant }
+                        }
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "drop.fill")
                                 .font(.system(size: 20))
                                 .foregroundStyle(.blue)
-                            Text("\(waterDropsCount)")
+                            Text("\(profile.waterDrops)")
                                 .font(.system(size: 22, weight: .bold, design: .rounded))
                                 .foregroundStyle(.primary)
                         }
                     }
-                    .accessibilityLabel("My garden, \(waterDropsCount) water drops")
+                    .accessibilityLabel("My garden, \(profile.waterDrops) water drops")
                 }
 
                 ToolbarItem(placement: .topBarLeading) {

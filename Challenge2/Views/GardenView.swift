@@ -9,7 +9,12 @@ import SwiftUI
 
 struct GardenView: View {
 
-    @State private var viewModel = GardenViewModel()
+    @State private var viewModel: GardenViewModel
+
+    init(waterDrops: Int, plantDrops: Int, onChange: @escaping (Int, Int) -> Void) {
+        _viewModel = State(initialValue: GardenViewModel(
+            availableDrops: waterDrops, plantDrops: plantDrops, onChange: onChange))
+    }
 
     var body: some View {
             VStack(spacing: 16) {
@@ -190,6 +195,6 @@ struct GardenView: View {
 
 #Preview {
     NavigationStack {
-        GardenView()
+        GardenView(waterDrops: 5, plantDrops: 0) { _, _ in }
     }
 }
