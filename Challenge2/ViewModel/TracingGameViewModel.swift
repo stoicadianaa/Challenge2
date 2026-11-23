@@ -20,12 +20,12 @@ final class TracingGameViewModel {
         TraceColor(name: "Purple", color: .purple)
     ]
 
-    var shapeIndex = 0
+    // A round is one shape; pick a different one each time.
+    var shapeIndex = Int.random(in: 0..<TraceShape.allCases.count)
     var selectedColorIndex = 3
     var strokes: [DrawnStroke] = []
     var current: DrawnStroke?
     var isCompleted = false
-    var finishedShapes: Set<Int> = []
 
     // Rules (change these numbers to make it easier or harder)
     let lineWidth: CGFloat = 18
@@ -76,13 +76,6 @@ final class TracingGameViewModel {
         current = nil
     }
 
-    func nextShape() {
-        isCompleted = false
-        clear()
-        shapeIndex = (shapeIndex + 1) % shapes.count
-        if shapeIndex == 0 { finishedShapes.removeAll() }
-    }
-
     private func checkCompletion(targetCount: Int) {
         guard targetCount > 0 else { return }
 
@@ -98,8 +91,8 @@ final class TracingGameViewModel {
         let accuracy = total > 0 ? Double(near) / Double(total) : 0
 
         if coverage >= neededCoverage && accuracy >= neededAccuracy {
-            finishedShapes.insert(shapeIndex)
             isCompleted = true
+            onReward(1)   // credit the drop now, so leaving the reward screen can't lose it
         }
     }
 }
