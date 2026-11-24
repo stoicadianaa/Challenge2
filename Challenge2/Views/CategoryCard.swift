@@ -41,7 +41,7 @@ struct CategoryCard: View {
             .glassEffect(.regular.tint(cardColor.opacity(0.55)),
                          in: .rect(cornerRadius: 36))
         }
-         .accessibilityLabel(title)
+        .accessibilityLabel(title)
     }
 
     private var icon: some View {
