@@ -20,6 +20,10 @@ struct OrderingGameModel {
     
     mutating func shuffle() {
         elements.shuffle()
+        // A random shuffle can land on the solution (1 in 6 with 3 items): never start solved.
+        while elements.count > 1 && isInCorrectOrder {
+            elements.shuffle()
+        }
     }
     
     mutating func apply(_ difference: ReorderDifference<OrderingGameItem.ID, ReorderableSingleCollectionIdentifier>) {
