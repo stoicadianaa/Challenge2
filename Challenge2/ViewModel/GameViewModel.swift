@@ -141,7 +141,12 @@ final class GameViewModel {
         Game(difficulty: $0.difficulty, content: .oddOneOut($0))
     }
 
-    var games: [Game] { orderingGames + oddOneOutGames + wordMatchGames + tracingGames }
+    // MARK: Words - Fruit Drag: every letter is one game, at the difficulty it declares
+    private let fruitDragGames: [Game] = FruitDragGameModel.all.map {
+        Game(difficulty: $0.difficulty, content: .fruitDrag($0))
+    }
+
+    var games: [Game] { orderingGames + oddOneOutGames + wordMatchGames + fruitDragGames + tracingGames }
 
     func games(type: GameType, difficulty: Difficulty) -> [Game] {
         games.filter { $0.type == type && $0.difficulty == difficulty }
