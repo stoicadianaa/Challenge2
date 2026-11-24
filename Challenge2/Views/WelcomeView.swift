@@ -4,16 +4,27 @@ struct WelcomeView: View {
     // Start moves on to the home screen; the app itself doesn't need to know.
     @State private var hasStarted = false
 
+    // One store for the whole app session; the chosen child decides whose progress is played.
+    @StateObject private var store = ProfileStore()
+    @State private var selectedProfile: ChildProfile?
+
     @State private var floating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.screenSize) private var screen
     @State private var showBubble = false
 
     @State private var viewModel = WelcomeViewModel()
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
 
     var body: some View {
-        if hasStarted {
-            HomeView()
+        if let profile = selectedProfile {
+            HomeView(
+                profile: profile,
+                onChange: store.update,
+                onSwitchProfile: { selectedProfile = nil }
+            )
+        } else if hasStarted {
+            ProfileSelectionView(store: store) { selectedProfile = $0 }
         } else {
             welcome
         }
@@ -27,15 +38,17 @@ struct WelcomeView: View {
                 .ignoresSafeArea()
                 .accessibilityHidden(true)
 
-            VStack(spacing: 32) {
-                WelcomeLogo(fontSize: 60)
+            VStack(spacing: screen.isCompact ? 16 : 32) {
+                WelcomeLogo(fontSize: screen.isCompact ? 36 : 60)
 
                 ZStack(alignment: .topTrailing) {
 
                     Image("mascot_genderless_celebrating")
                         .resizable()
                         .scaledToFit()
-                        .containerRelativeFrame(.vertical) { height, _ in height * 0.44 }
+                        .containerRelativeFrame(.vertical) { height, _ in
+                            height * screen.value(regular: 0.44, portrait: 0.3, landscape: 0.38)
+                        }
                         .offset(y: floating ? -12 : 12)
                         .rotationEffect(.degrees(floating ? 2 : -2))
                         .animation(
@@ -46,7 +59,8 @@ struct WelcomeView: View {
                         .accessibilityHidden(true)
 
                     SpeechBubble(text: "Welcome!")
-                        .offset(x: 150, y: -20)
+                        .offset(x: screen.value(regular: 150, portrait: 20, landscape: 130),
+                                y: screen.isPhonePortrait ? -30 : -20)
                         .scaleEffect(showBubble ? 1 : 0.2, anchor: .bottomLeading)
                         .opacity(showBubble ? 1 : 0)
                         .animation(

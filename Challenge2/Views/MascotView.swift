@@ -9,9 +9,12 @@
 import SwiftUI
 
 struct MascotView: View {
+    @Environment(\.screenSize) private var screen
+
     let mascot: Mascot
     var message: String?  // nil hides the bubble
-    var height: CGFloat = 200
+    /// nil uses the one size shared by every game screen (smaller on an iPhone).
+    var height: CGFloat?
     let onTap: () -> Void
 
     var body: some View {
@@ -20,7 +23,7 @@ struct MascotView: View {
                 Image(mascot.imageName)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: height)
+                    .frame(height: height ?? screen.mascotHeight)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Mascot")
@@ -36,8 +39,20 @@ struct MascotView: View {
                     .allowsHitTesting(false)  // the bubble never blocks the game underneath
             }
         }
-        .padding(16)
+        .padding(screen.isCompact ? 8 : 16)
         .animation(.spring, value: message)
+    }
+}
+
+extension View {
+    /// Puts the coach's mascot in the one place every game screen uses: bottom-left, same size.
+    /// Pass `mascot` when the face changes with the screen's state (e.g. happy / sad).
+    func mascotOverlay(_ coach: MascotCoach, mascot: Mascot? = nil) -> some View {
+        overlay(alignment: .bottomLeading) {
+            MascotView(mascot: mascot ?? coach.mascot, message: coach.line) {
+                coach.encourage()
+            }
+        }
     }
 }
 

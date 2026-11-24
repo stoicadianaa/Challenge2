@@ -18,12 +18,13 @@ struct FruitTile: View {
     let onDrop: (CGPoint) -> Bool            // true = right fruit, false = it comes back
     let onChoose: () -> Void                 // VoiceOver: double tap instead of dragging
 
+    @Environment(\.screenSize) private var screen
     @State private var offset: CGSize = .zero
     @State private var isDragging = false
 
     var body: some View {
         Text(fruit.emoji)
-            .padding(24)
+            .padding(screen.isCompact ? 10 : 24)
             .glassEffect(.regular, in: .circle)
             .offset(offset)
             .scaleEffect(scale)

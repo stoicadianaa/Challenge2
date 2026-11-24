@@ -13,10 +13,17 @@ struct GameSessionView: View {
     @State private var viewModel: GameSessionViewModel
     @Environment(\.dismiss) private var dismiss
 
-    // Same parameters as before, so HomeView doesn't change.
-    init(games: [Game], gameCount: Int = 1, onFinish: @escaping (_ drops: Int) -> Void) {
+    init(
+        type: GameType,
+        games: GameViewModel,
+        progress: SkillProgress,
+        gameCount: Int = 1,
+        onProgressChange: @escaping (SkillProgress) -> Void,
+        onFinish: @escaping (_ drops: Int) -> Void
+    ) {
         _viewModel = State(initialValue: GameSessionViewModel(
-            games: games, gameCount: gameCount, onFinish: onFinish))
+            type: type, games: games, progress: progress, gameCount: gameCount,
+            onProgressChange: onProgressChange, onFinish: onFinish))
     }
 
     var body: some View {
@@ -29,8 +36,20 @@ struct GameSessionView: View {
             case .ordering(let model):
                 OrderingGame(game: model, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
+            case .oddOneOut(let model):
+                OddOneOutView(game: model, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
+            case .fruitDrag(let model):
+                FruitDragView(game: model, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
+            case .mathMatch(let question):
+                MathMatchView(question: question, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
             case .wordMatch(let question):
                 WordMatchView(question: question, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
+            case .tracing(let shape):
+                TracingGameView(shape: shape, difficulty: game.difficulty, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
             }
         }

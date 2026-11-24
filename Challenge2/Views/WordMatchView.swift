@@ -9,48 +9,34 @@ import SwiftUI
 struct WordMatchView: View {
 
     @State private var viewModel: WordMatchViewModel
+    @Environment(\.screenSize) private var screen
 
     // Called when the child finds the word. The session decides what happens next.
-    let onCorrect: () -> Void
+    let onCorrect: (GameResult) -> Void
 
-    init(question: WordMatchQuestion, onCorrect: @escaping () -> Void) {
+    init(question: WordMatchQuestion, onCorrect: @escaping (GameResult) -> Void) {
         _viewModel = State(initialValue: WordMatchViewModel(question: question))
         self.onCorrect = onCorrect
     }
 
     var body: some View {
-        // One centered group with even spacing; the two Spacers share the leftover room
-        VStack(spacing: 24) {
-            Spacer()
-
-            instruction
-            emojiCard
-            choices
-
-            Spacer()
-        }
-        .padding(.horizontal, 32)
-        .padding(.vertical, 16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // The mascot floats above the game; its bubble may cover the content
-        .overlay(alignment: .bottomLeading) {
-            mascot
-        }
-        .background {
-            Image("background")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .accessibilityHidden(true)
+        GameScreen(title: "Find the correct word!", coach: viewModel.coach) {
+            // The picture and its answers stay together, so they read as one question.
+            VStack(spacing: screen.isCompact ? 16 : 32) {
+                emojiCard
+                choices
+            }
+        } footer: {
+            EmptyView()
         }
         // After a correct answer, let the mascot finish talking, then hand over to the session.
         // The task is cancelled automatically if the screen closes first.
         .task(id: viewModel.selectedAnswer) {
             guard viewModel.isAnswered else { return }
-            await viewModel.waitUntilMascotIsQuiet()
+            await viewModel.coach.waitUntilQuiet()
             try? await Task.sleep(for: .seconds(0.5))  // a beat to enjoy the praise
             guard !Task.isCancelled else { return }
-            onCorrect()
+            onCorrect(GameResult(solvedFirstTry: viewModel.wrongAnswers.isEmpty))
         }
         .sensoryFeedback(.success, trigger: viewModel.selectedAnswer) {
             _,
@@ -62,33 +48,24 @@ struct WordMatchView: View {
         }
     }
 
-    private var instruction: some View {
-        VStack(spacing: 12) {
-            Button("Find the correct word!", systemImage: "speaker.wave.2.fill")
-            {
-                viewModel.speakInstruction()
-            }
-            .font(.system(.title2, design: .rounded, weight: .bold))
-            .buttonStyle(.glass)
-            .controlSize(.extraLarge)
-
-//            ProgressView(value: viewModel.progress)
-//                .tint(.green)
-//                .frame(width: 300)
-//                .accessibilityLabel("Progress")
-        }
-    }
-
     private var emojiCard: some View {
         Text(viewModel.question.emoji)
-            .font(.system(size: 120))
-            .padding(.horizontal, 56)
-            .padding(.vertical, 28)
-            .glassEffect(.regular, in: .rect(cornerRadius: 40))
+            .font(.system(size: screen.value(regular: 180, portrait: 110, landscape: 80)))
+            .padding(.horizontal, screen.isCompact ? 32 : 64)
+            .padding(.vertical, screen.isCompact ? 14 : 28)
+            .glassEffect(.regular, in: .rect(cornerRadius: screen.isCompact ? 32 : 48))
+    }
+
+    // Stacked on a phone held upright, so each word keeps a big, readable button
+    // instead of three squeezed ones.
+    private var choicesLayout: AnyLayout {
+        screen.isPhonePortrait
+            ? AnyLayout(VStackLayout(spacing: 12))
+            : AnyLayout(HStackLayout(spacing: screen.isCompact ? 12 : 24))
     }
 
     private var choices: some View {
-        HStack(spacing: 20) {
+        choicesLayout {
             ForEach(
                 Array(viewModel.question.choices.enumerated()),
                 id: \.element
@@ -98,9 +75,11 @@ struct WordMatchView: View {
                 } label: {
                     Text(choice)
                         .font(
-                            .system(.title2, design: .rounded, weight: .heavy)
+                            .system(.title, design: .rounded, weight: .heavy)
                         )
-                        .frame(minWidth: 150)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent)
                 .tint(tint(for: choice, at: index))
@@ -116,15 +95,8 @@ struct WordMatchView: View {
         if viewModel.wrongAnswers.contains(choice) { return .red }
         return [Color.blue, .teal, .orange][index % 3]
     }
-
-    // The bubble shows exactly while the mascot speaks; the view model decides when
-    private var mascot: some View {
-        MascotView(mascot: viewModel.mascot, message: viewModel.mascotLine) {
-            viewModel.encourage()
-        }
-    }
 }
 
 #Preview {
-    WordMatchView(question: WordMatchQuestion.all[0], onCorrect: {})
+    WordMatchView(question: WordMatchQuestion.all[0], onCorrect: { _ in })
 }

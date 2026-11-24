@@ -40,7 +40,7 @@ final class HomeViewModel {
         replayGreeting()
     }
 
-    /// Speaker button in the nav bar.
+    /// The tappable title on the home screen.
     func replayGreeting() {
         speaker.say(greeting)
     }

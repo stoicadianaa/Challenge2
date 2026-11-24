@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum GameType: CaseIterable, Identifiable {
+enum GameType: CaseIterable, Identifiable, Codable {
     case words, numbers, logic, creativity
 
     var id: Self { self }
