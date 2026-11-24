@@ -21,22 +21,21 @@ struct TracingGameView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            InstructionButton(text: "Trace the \(viewModel.shape.title)!", coach: viewModel.coach)
-            TraceReferenceCard(shape: viewModel.shape)
-            TracePaletteBar(viewModel: viewModel)
+        GameScreen(
+            title: "Trace the \(viewModel.shape.title)!",
+            coach: viewModel.coach,
+            expandsContent: true
+        ) {
+            // The drawing area takes all the room; the reference card sits in its corner.
             TraceDrawingArea(viewModel: viewModel)
+                .overlay(alignment: .topTrailing) {
+                    TraceReferenceCard(shape: viewModel.shape)
+                        .padding(16)
+                        .allowsHitTesting(false)  // never blocks drawing underneath
+                }
+        } footer: {
+            TracePaletteBar(viewModel: viewModel)
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
-        .background {
-            Image("background")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .accessibilityHidden(true)
-        }
-        .mascotOverlay(viewModel.coach)
         // After the shape is traced, let the mascot finish praising, then hand over to the session.
         .task(id: viewModel.isCompleted) {
             guard viewModel.isCompleted else { return }
@@ -45,7 +44,6 @@ struct TracingGameView: View {
             guard !Task.isCancelled else { return }
             onCorrect(GameResult(solvedFirstTry: viewModel.solvedFirstTry))
         }
-        .navigationTitle("Trace & Draw")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(viewModel.isCompleted)
         .sensoryFeedback(.success, trigger: viewModel.isCompleted) { _, completed in completed }

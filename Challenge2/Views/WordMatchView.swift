@@ -19,27 +19,14 @@ struct WordMatchView: View {
     }
 
     var body: some View {
-        // One centered group with even spacing; the two Spacers share the leftover room
-        VStack(spacing: 24) {
-            Spacer()
-
-            instruction
-            emojiCard
-            choices
-
-            Spacer()
-        }
-        .padding(.horizontal, 32)
-        .padding(.vertical, 16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        // The mascot floats above the game; its bubble may cover the content
-        .mascotOverlay(viewModel.coach)
-        .background {
-            Image("background")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-                .accessibilityHidden(true)
+        GameScreen(title: "Find the correct word!", coach: viewModel.coach) {
+            // The picture and its answers stay together, so they read as one question.
+            VStack(spacing: 32) {
+                emojiCard
+                choices
+            }
+        } footer: {
+            EmptyView()
         }
         // After a correct answer, let the mascot finish talking, then hand over to the session.
         // The task is cancelled automatically if the screen closes first.
@@ -60,27 +47,16 @@ struct WordMatchView: View {
         }
     }
 
-    private var instruction: some View {
-        VStack(spacing: 12) {
-            InstructionButton(text: "Find the correct word!", coach: viewModel.coach)
-
-//            ProgressView(value: viewModel.progress)
-//                .tint(.green)
-//                .frame(width: 300)
-//                .accessibilityLabel("Progress")
-        }
-    }
-
     private var emojiCard: some View {
         Text(viewModel.question.emoji)
-            .font(.system(size: 120))
-            .padding(.horizontal, 56)
+            .font(.system(size: 180))
+            .padding(.horizontal, 64)
             .padding(.vertical, 28)
-            .glassEffect(.regular, in: .rect(cornerRadius: 40))
+            .glassEffect(.regular, in: .rect(cornerRadius: 48))
     }
 
     private var choices: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: 24) {
             ForEach(
                 Array(viewModel.question.choices.enumerated()),
                 id: \.element
@@ -90,11 +66,11 @@ struct WordMatchView: View {
                 } label: {
                     Text(choice)
                         .font(
-                            .system(.title2, design: .rounded, weight: .heavy)
+                            .system(.title, design: .rounded, weight: .heavy)
                         )
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                        .frame(minWidth: 150)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.glassProminent)
                 .tint(tint(for: choice, at: index))

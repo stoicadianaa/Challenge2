@@ -17,78 +17,65 @@ struct OrderingGame: View {
     // Called when the order is correct. The session decides what happens next.
     let onCorrect: (GameResult) -> Void
 
-    // 3-4 items keep the big emoji; 5 and 6 shrink so the row still fits the screen.
-    private var emojiSize: CGFloat {
-        switch game.elements.count {
-        case ...4: 180
-        case 5: 130
-        default: 110
-        }
+    private let tileSpacing: CGFloat = 20
+    private let tilePadding: CGFloat = 20
+
+    // As big as the row allows: few items get huge emoji, 5-6 shrink so the row still fits.
+    private func emojiSize(rowWidth: CGFloat) -> CGFloat {
+        let count = CGFloat(game.elements.count)
+        let tileWidth = (rowWidth - tileSpacing * (count - 1)) / count
+        return min(240, (tileWidth - tilePadding * 2) / 1.25)
     }
 
     var body: some View {
-        VStack {
-            Spacer()
-
-            InstructionButton(text: game.title, coach: coach)
-
-            Spacer()
-
-            HStack(spacing: game.elements.count > 4 ? 16 : 32) {
-                ForEach(game.elements) { element in
-                    Text(element.emoji)
-                        .padding()
-                        .glassEffect(.regular, in: .rect(cornerRadius: 32))
+        GameScreen(title: game.title, coach: coach) {
+            GeometryReader { row in
+                HStack(spacing: tileSpacing) {
+                    ForEach(game.elements) { element in
+                        Text(element.emoji)
+                            .padding(tilePadding)
+                            .glassEffect(.regular, in: .rect(cornerRadius: 36))
+                    }
+                    .reorderable()
                 }
-                .reorderable()
-            }
-            .frame(maxWidth: .infinity)
-            .font(.system(size: emojiSize))
-            .reorderContainer(for: OrderingGameItem.self) { difference in
-                game.apply(difference)
-                showTryAgain = false
-            }
-
-            Spacer()
-
-            Button("Check") {
-                if game.isInCorrectOrder {
-                    // Right answer: the mascot praises, then the task below hands over to the session.
-                    solved = true
-                    coach.say("Amazing! Well done!")
-                } else {
-                    wrongChecks += 1
-                    showTryAgain = true
-                    coach.say("Try again! You can do it!")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .font(.system(size: emojiSize(rowWidth: row.size.width)))
+                .reorderContainer(for: OrderingGameItem.self) { difference in
+                    game.apply(difference)
+                    showTryAgain = false
                 }
             }
-            .buttonStyle(.glassProminent)
-            .tint(.green)
-            .controlSize(.extraLarge)
-            .disabled(solved)
-            .font(.title.bold())
+            .frame(height: 340)
+        } footer: {
+            VStack(spacing: 12) {
+                Button("Check") {
+                    if game.isInCorrectOrder {
+                        // Right answer: the mascot praises, then the task below hands over to the session.
+                        solved = true
+                        coach.say("Amazing! Well done!")
+                    } else {
+                        wrongChecks += 1
+                        showTryAgain = true
+                        coach.say("Try again! You can do it!")
+                    }
+                }
+                .buttonStyle(.glassProminent)
+                .tint(.green)
+                .controlSize(.extraLarge)
+                .disabled(solved)
+                .font(.title.bold())
 
-            if showTryAgain {
-                Text("Try again")
+                if showTryAgain {
+                    Text("Try again")
+                }
             }
-
-            Spacer()
-
         }
-        .fontDesign(.rounded)
-        .mascotOverlay(coach)
         .task(id: solved) {
             guard solved else { return }
             await coach.waitUntilQuiet()
             try? await Task.sleep(for: .seconds(0.5))  // a beat to enjoy the praise
             guard !Task.isCancelled else { return }
             onCorrect(GameResult(solvedFirstTry: wrongChecks == 0))
-        }
-        .background {
-            Image("background")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
         }
         .onAppear {
             game.shuffle()
