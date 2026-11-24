@@ -1,101 +1,74 @@
 import SwiftUI
 
 struct FlowerAlbumView: View {
-    @Environment(FlowerAlbumViewModel.self) private var viewModel
+    // imageName of the flowers the child has unlocked.
+    let unlockedFlowers: [String]
 
-    // Always 5 cards per row, so the cards are smaller than with an adaptive grid.
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 5)
+    // Tapping the mascot here talks about flowers, not about a game.
+    @State private var coach = MascotCoach(mascot: Mascot.happy.saying([
+        "Look how pretty they are!",
+        "Which flower is your favorite?",
+        "Keep playing to find more flowers!",
+        "Every flower grows from a little seed!",
+    ]))
 
-    // TEMPORARY: only for previewing how the screen looks when it is filled.
-    // Remove once the view model has enough real flowers.
-    private let placeholderTotal = 30
+    private var isComplete: Bool { unlockedFlowers.count >= Flower.catalog.count }
 
-    private var placeholderCount: Int {
-        guard !viewModel.flowers.isEmpty else { return 0 }
-        return max(0, placeholderTotal - viewModel.flowers.count)
+    private var flowers: [Flower] { Flower.album(unlocked: unlockedFlowers) }
+
+    @Environment(\.screenSize) private var screen
+
+    // 4 cards per row, but only 2 on a phone held upright, where 4 would be too small to see.
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 16), count: screen.isPhonePortrait ? 2 : 4)
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(viewModel.flowers) { flower in
+                    ForEach(flowers) { flower in
                         FlowerCardView(flower: flower)
-                    }
-
-                    // TEMPORARY: extra locked cards, just to see how the screen looks filled.
-                    // They reuse the real flowers' images and are not part of the data.
-                    ForEach(0..<placeholderCount, id: \.self) { index in
-                        let source = viewModel.flowers[index % viewModel.flowers.count]
-                        FlowerCardView(
-                            flower: Flower(
-                                imageName: source.imageName,
-                                name: "Placeholder",
-                                isUnlocked: false
-                            )
-                        )
                     }
                 }
             }
-            .padding(32)
+            .padding(screen.isCompact ? 16 : 32)
+            // Keeps the last row clear of the floating mascot.
+            .padding(.bottom, screen.value(regular: 260, portrait: screen.mascotHeight + 40, landscape: screen.mascotHeight + 20))
         }
         .scrollIndicators(.hidden)
-        .safeAreaInset(edge: .bottom, content: {
-            EncouragementBanner()
-        })
         .background {
-            Color.clear
-                .overlay {
                     Image("background")
                         .resizable()
                         .scaledToFill()
-                }
-                .clipped()
-                .ignoresSafeArea()
+                        .ignoresSafeArea()
+                        .accessibilityHidden(true)
         }
+        .mascotOverlay(coach, mascot: isComplete ? .celebrating : .happy)
+        .task {
+            coach.say(isComplete
+                ? "You found all the flowers!"
+                : "Play more games to unlock new flowers!")
+        }
+        .navigationTitle("My Flower Album")
         .toolbarTitleDisplayMode(.inline)
-        .navigationTitle("Your Flower Album")
-        // Larger brown title. The system back button stays, since we use the NavigationStack.
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("Your Flower Album")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.35, green: 0.24, blue: 0.13))
+                Text("My Flower Album")
+                    .font(.system(size: screen.value(regular: 36, portrait: 22, landscape: 26), weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, screen.isCompact ? 14 : 24)
+                    .padding(.vertical, screen.isCompact ? 6 : 8)
+                    .glassEffect(.regular, in: .capsule)
+                    .accessibilityAddTraits(.isHeader)
             }
         }
-    }
-}
-
-// MARK: - Bottom Message
-
-private struct EncouragementBanner: View {
-    var body: some View {
-        HStack(spacing: 16) {
-            Image("flower_buttercup")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 56, height: 64)
-                .accessibilityHidden(true)
-
-            Text("Play more games to unlock new flowers!")
-                .font(.system(.title3, design: .rounded, weight: .semibold))
-                .foregroundStyle(.brown)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 14)
-        .background(
-            Color(.systemBackground),
-            in: RoundedRectangle(cornerRadius: 28)
-        )
-        .shadow(color: .brown.opacity(0.12), radius: 3, y: 3)
-        .frame(maxWidth: 580)
     }
 }
 
 #Preview {
     NavigationStack {
-        FlowerAlbumView()
+        FlowerAlbumView(unlockedFlowers: ["flower_daisy", "flower_poppy"])
     }
-    .environment(FlowerAlbumViewModel())
 }

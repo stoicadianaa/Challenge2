@@ -11,8 +11,8 @@ import SwiftUI
 struct Challenge2App: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .environment(FlowerAlbumViewModel())
+            WelcomeView()
+                .providesScreenSize()
         }
     }
 }
