@@ -132,6 +132,15 @@ struct HomeView: View {
                     .accessibilityLabel("Change player")
                 }
 
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView(profile: profile)
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                    }
+                    .accessibilityLabel("Parent dashboard")
+                }
+
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
                         GardenView(
