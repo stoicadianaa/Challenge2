@@ -131,7 +131,12 @@ final class GameViewModel {
         Game(difficulty: $0.difficulty, content: .wordMatch($0))
     }
 
-    var games: [Game] { orderingGames + wordMatchGames }
+    // MARK: Creativity - Tracing: every shape at every level (the level sets how strict tracing is)
+    private let tracingGames: [Game] = Difficulty.allCases.flatMap { level in
+        TraceShape.allCases.map { Game(difficulty: level, content: .tracing($0)) }
+    }
+
+    var games: [Game] { orderingGames + wordMatchGames + tracingGames }
 
     func games(type: GameType, difficulty: Difficulty) -> [Game] {
         games.filter { $0.type == type && $0.difficulty == difficulty }

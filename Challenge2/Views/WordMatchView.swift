@@ -33,9 +33,7 @@ struct WordMatchView: View {
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         // The mascot floats above the game; its bubble may cover the content
-        .overlay(alignment: .bottomLeading) {
-            mascot
-        }
+        .mascotOverlay(viewModel.coach)
         .background {
             Image("background")
                 .resizable()
@@ -47,7 +45,7 @@ struct WordMatchView: View {
         // The task is cancelled automatically if the screen closes first.
         .task(id: viewModel.selectedAnswer) {
             guard viewModel.isAnswered else { return }
-            await viewModel.waitUntilMascotIsQuiet()
+            await viewModel.coach.waitUntilQuiet()
             try? await Task.sleep(for: .seconds(0.5))  // a beat to enjoy the praise
             guard !Task.isCancelled else { return }
             onCorrect(GameResult(solvedFirstTry: viewModel.wrongAnswers.isEmpty))
@@ -66,7 +64,7 @@ struct WordMatchView: View {
         VStack(spacing: 12) {
             Button("Find the correct word!", systemImage: "speaker.wave.2.fill")
             {
-                viewModel.speakInstruction()
+                viewModel.coach.speakInstruction("Find the correct word!")
             }
             .font(.system(.title2, design: .rounded, weight: .bold))
             .buttonStyle(.glass)
@@ -117,13 +115,6 @@ struct WordMatchView: View {
         if choice == viewModel.selectedAnswer { return .green }
         if viewModel.wrongAnswers.contains(choice) { return .red }
         return [Color.blue, .teal, .orange][index % 3]
-    }
-
-    // The bubble shows exactly while the mascot speaks; the view model decides when
-    private var mascot: some View {
-        MascotView(mascot: viewModel.mascot, message: viewModel.mascotLine) {
-            viewModel.encourage()
-        }
     }
 }
 

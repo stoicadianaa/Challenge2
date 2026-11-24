@@ -9,9 +9,12 @@
 import SwiftUI
 
 struct MascotView: View {
+    /// The one size used on every game screen.
+    static let standardHeight: CGFloat = 200
+
     let mascot: Mascot
     var message: String?  // nil hides the bubble
-    var height: CGFloat = 200
+    var height: CGFloat = MascotView.standardHeight
     let onTap: () -> Void
 
     var body: some View {
@@ -38,6 +41,17 @@ struct MascotView: View {
         }
         .padding(16)
         .animation(.spring, value: message)
+    }
+}
+
+extension View {
+    /// Puts the coach's mascot in the one place every game screen uses: bottom-left, same size.
+    func mascotOverlay(_ coach: MascotCoach) -> some View {
+        overlay(alignment: .bottomLeading) {
+            MascotView(mascot: coach.mascot, message: coach.line) {
+                coach.encourage()
+            }
+        }
     }
 }
 

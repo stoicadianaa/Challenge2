@@ -8,6 +8,24 @@
 import Foundation
 import SwiftUI
 
+/// How strict tracing is at one difficulty.
+struct TraceRules {
+    let lineWidth: CGFloat       // thicker pen = more forgiving
+    let tolerance: CGFloat       // how far from the line still counts as "on" it
+    let neededCoverage: Double   // share of the outline that must be covered
+    let neededAccuracy: Double   // share of the pen's points that must be near the line
+}
+
+extension Difficulty {
+    var traceRules: TraceRules {
+        switch self {
+        case .easy:   TraceRules(lineWidth: 24, tolerance: 44, neededCoverage: 0.70, neededAccuracy: 0.45)
+        case .medium: TraceRules(lineWidth: 18, tolerance: 32, neededCoverage: 0.85, neededAccuracy: 0.55)
+        case .hard:   TraceRules(lineWidth: 14, tolerance: 24, neededCoverage: 0.92, neededAccuracy: 0.70)
+        }
+    }
+}
+
 enum TraceShape: CaseIterable {
     case star, circle, triangle, square, heart
 

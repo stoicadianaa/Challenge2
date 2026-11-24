@@ -11,6 +11,8 @@ struct OrderingGame: View {
     @State var game: OrderingGameModel
     @State private var showTryAgain = false
     @State private var wrongChecks = 0
+    @State private var solved = false
+    @State private var coach = MascotCoach()
 
     // Called when the order is correct. The session decides what happens next.
     let onCorrect: (GameResult) -> Void
@@ -60,16 +62,19 @@ struct OrderingGame: View {
 
             Button("Check") {
                 if game.isInCorrectOrder {
-                    // Right answer: straight on, the reward screen does the celebrating.
-                    onCorrect(GameResult(solvedFirstTry: wrongChecks == 0))
+                    // Right answer: the mascot praises, then the task below hands over to the session.
+                    solved = true
+                    coach.say("Amazing! Well done!")
                 } else {
                     wrongChecks += 1
                     showTryAgain = true
+                    coach.say("Try again! You can do it!")
                 }
             }
             .buttonStyle(.glassProminent)
             .tint(.green)
             .controlSize(.extraLarge)
+            .disabled(solved)
             .font(.title.bold())
 
             if showTryAgain {
@@ -80,6 +85,14 @@ struct OrderingGame: View {
 
         }
         .fontDesign(.rounded)
+        .mascotOverlay(coach)
+        .task(id: solved) {
+            guard solved else { return }
+            await coach.waitUntilQuiet()
+            try? await Task.sleep(for: .seconds(0.5))  // a beat to enjoy the praise
+            guard !Task.isCancelled else { return }
+            onCorrect(GameResult(solvedFirstTry: wrongChecks == 0))
+        }
         .background {
             Image("background")
                 .resizable()

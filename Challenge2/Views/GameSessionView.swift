@@ -39,6 +39,9 @@ struct GameSessionView: View {
             case .wordMatch(let question):
                 WordMatchView(question: question, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
+            case .tracing(let shape):
+                TracingGameView(shape: shape, difficulty: game.difficulty, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
             }
         }
     }

@@ -8,10 +8,11 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 @Observable
 final class TracingGameViewModel {
 
-    let shapes = TraceShape.allCases
+    let shape: TraceShape
     let palette: [TraceColor] = [
         TraceColor(name: "Red",    color: .red),
         TraceColor(name: "Blue",   color: .blue),
@@ -20,26 +21,30 @@ final class TracingGameViewModel {
         TraceColor(name: "Purple", color: .purple)
     ]
 
-    // A round is one shape; pick a different one each time.
-    var shapeIndex = Int.random(in: 0..<TraceShape.allCases.count)
     var selectedColorIndex = 3
     var strokes: [DrawnStroke] = []
     var current: DrawnStroke?
     var isCompleted = false
 
-    // Rules (change these numbers to make it easier or harder)
-    let lineWidth: CGFloat = 18
-    private let tolerance: CGFloat = 32
-    private let neededCoverage = 0.85
-    private let neededAccuracy = 0.55
+    // Set by the difficulty (see Difficulty.traceRules)
+    private let rules: TraceRules
+    var lineWidth: CGFloat { rules.lineWidth }
+    private var tolerance: CGFloat { rules.tolerance }
 
-    private let onReward: (Int) -> Void
+    let coach: MascotCoach
+    // Undo / Clear / a "not quite" stroke mean the child had to redo something.
+    private var redoCount = 0
+    // How far below the needed coverage still counts as "close" (0.25 = within 25 points).
+    private let closeMargin = 0.25
 
-    init(onReward: @escaping (Int) -> Void = { _ in }) {
-        self.onReward = onReward
+    var solvedFirstTry: Bool { redoCount == 0 }
+
+    init(shape: TraceShape, difficulty: Difficulty, coach: MascotCoach? = nil) {
+        self.shape = shape
+        self.rules = difficulty.traceRules
+        self.coach = coach ?? MascotCoach()
     }
 
-    var shape: TraceShape { shapes[shapeIndex] }
     var selectedColor: Color { palette[selectedColorIndex].color }
     var allStrokes: [DrawnStroke] { strokes + (current.map { [$0] } ?? []) }
     var canUndo: Bool { !strokes.isEmpty }
@@ -68,10 +73,11 @@ final class TracingGameViewModel {
     }
 
     func undo() {
-        if !strokes.isEmpty { strokes.removeLast() }
+        if !strokes.isEmpty { strokes.removeLast(); redoCount += 1 }
     }
 
     func clear() {
+        if !strokes.isEmpty { redoCount += 1 }
         strokes.removeAll()
         current = nil
     }
@@ -90,9 +96,15 @@ final class TracingGameViewModel {
         let coverage = Double(covered.count) / Double(targetCount)
         let accuracy = total > 0 ? Double(near) / Double(total) : 0
 
-        if coverage >= neededCoverage && accuracy >= neededAccuracy {
+        if coverage >= rules.neededCoverage && accuracy >= rules.neededAccuracy {
             isCompleted = true
-            onReward(1)   // credit the drop now, so leaving the reward screen can't lose it
+            coach.say("Amazing! Well done!")
+        } else if coverage >= rules.neededCoverage - closeMargin {
+            // Close, but not there yet: tell the child instead of leaving them guessing.
+            redoCount += 1
+            coach.sayIfQuiet(accuracy < rules.neededAccuracy
+                ? "So close! Try to stay on the dotted line."
+                : "Almost there! Trace the rest of the line.")
         }
     }
 }
