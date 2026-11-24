@@ -39,6 +39,9 @@ struct GameSessionView: View {
             case .oddOneOut(let model):
                 OddOneOutView(game: model, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
+            case .lanternSorting(let model):
+                LanternSortingView(game: model, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
             case .fruitDrag(let model):
                 FruitDragView(game: model, onCorrect: viewModel.gameCompleted)
                     .id(game.id)

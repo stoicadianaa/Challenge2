@@ -236,7 +236,12 @@ final class GameViewModel {
         Game(difficulty: $0.difficulty, content: .fruitDrag($0))
     }
 
-    var games: [Game] { orderingGames + mathMatchGames + oddOneOutGames + wordMatchGames + fruitDragGames + tracingGames }
+    // MARK: Logic - Lantern Sorting: every pattern is one game, at the difficulty it declares
+    private let lanternSortingGames: [Game] = LanternSortingGameModel.all.map {
+        Game(difficulty: $0.difficulty, content: .lanternSorting($0))
+    }
+
+    var games: [Game] { orderingGames + mathMatchGames + oddOneOutGames + lanternSortingGames + wordMatchGames + fruitDragGames + tracingGames }
 
     func games(type: GameType, difficulty: Difficulty) -> [Game] {
         games.filter { $0.type == type && $0.difficulty == difficulty }
