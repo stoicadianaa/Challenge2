@@ -62,13 +62,7 @@ struct WordMatchView: View {
 
     private var instruction: some View {
         VStack(spacing: 12) {
-            Button("Find the correct word!", systemImage: "speaker.wave.2.fill")
-            {
-                viewModel.coach.speakInstruction("Find the correct word!")
-            }
-            .font(.system(.title2, design: .rounded, weight: .bold))
-            .buttonStyle(.glass)
-            .controlSize(.extraLarge)
+            InstructionButton(text: "Find the correct word!", coach: viewModel.coach)
 
 //            ProgressView(value: viewModel.progress)
 //                .tint(.green)

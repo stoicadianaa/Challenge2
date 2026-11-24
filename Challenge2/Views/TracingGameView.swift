@@ -22,6 +22,7 @@ struct TracingGameView: View {
 
     var body: some View {
         VStack(spacing: 16) {
+            InstructionButton(text: "Trace the \(viewModel.shape.title)!", coach: viewModel.coach)
             TraceReferenceCard(shape: viewModel.shape)
             TracePaletteBar(viewModel: viewModel)
             TraceDrawingArea(viewModel: viewModel)

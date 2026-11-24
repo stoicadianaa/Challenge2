@@ -55,13 +55,7 @@ struct HomeView: View {
 
                 Spacer()
                 
-                VStack(spacing: 4) {
-                    Text("Welcome to WonderBloom!")
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                        .padding(.horizontal, 32)
-                        .padding(.vertical, 12)
-                        .glassEffect(.regular, in: .capsule)
-                }
+                InstructionButton(text: "Welcome to WonderBloom!", speak: homeViewModel.replayGreeting)
                                 
                 Image("mascot_genderless_happy")
                     .resizable()
@@ -118,13 +112,6 @@ struct HomeView: View {
                     .accessibilityLabel("Change player")
                 }
 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: homeViewModel.replayGreeting) {
-                        Image(systemName: "speaker.wave.2.fill")
-                    }
-                    .accessibilityLabel("Hear the welcome again")
-                }
-                
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
                         GardenView(

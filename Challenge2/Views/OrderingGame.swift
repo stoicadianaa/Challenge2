@@ -30,16 +30,7 @@ struct OrderingGame: View {
         VStack {
             Spacer()
 
-            Button(
-                game.title,
-                systemImage: "speaker.wave.2.fill",
-                action: {
-                    // todo play the sound of the instructions
-                }
-            )
-            .font(.largeTitle.bold())
-
-            .buttonStyle(.glass)
+            InstructionButton(text: game.title, coach: coach)
 
             Spacer()
 
