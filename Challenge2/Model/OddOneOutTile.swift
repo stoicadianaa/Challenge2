@@ -16,11 +16,15 @@ struct OddOneOutTile: View {
     let shakes: Int
     let action: () -> Void
 
+    @Environment(\.screenSize) private var screen
+
+    static func padding(for screen: ScreenSize) -> CGFloat { screen.isCompact ? 8 : 20 }
+
     var body: some View {
         Button(action: action) {
             Text(emoji)
-                .padding(24)
-                .glassEffect(.regular.tint(tint.opacity(0.4)), in: .rect(cornerRadius: 32))
+                .padding(Self.padding(for: screen))
+                .glassEffect(.regular.tint(tint.opacity(0.4)), in: .rect(cornerRadius: screen.isCompact ? 20 : 32))
         }
         //.buttonStyle(ScaleButtonStyle())
         .disabled(isSolved || isWrong)
@@ -43,8 +47,8 @@ struct OddOneOutTile: View {
     private var cross: some View {
         if isOdd {
             CrossShape(progress: isSolved ? 2 : 0)
-                .stroke(.red, style: StrokeStyle(lineWidth: 10, lineCap: .round, lineJoin: .round))
-                .padding(-20)                 // a bit bigger than the tile
+                .stroke(.red, style: StrokeStyle(lineWidth: screen.isCompact ? 6 : 10, lineCap: .round, lineJoin: .round))
+                .padding(screen.isCompact ? -10 : -20)   // a bit bigger than the tile
                 .allowsHitTesting(false)
                 .animation(.easeOut(duration: 0.7), value: isSolved)
         }

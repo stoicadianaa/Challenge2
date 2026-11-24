@@ -136,7 +136,12 @@ final class GameViewModel {
         TraceShape.allCases.map { Game(difficulty: level, content: .tracing($0)) }
     }
 
-    var games: [Game] { orderingGames + wordMatchGames + tracingGames }
+    // MARK: Logic - Odd One Out: every puzzle is one game, at the difficulty it declares
+    private let oddOneOutGames: [Game] = OddOneOutGameModel.all.map {
+        Game(difficulty: $0.difficulty, content: .oddOneOut($0))
+    }
+
+    var games: [Game] { orderingGames + oddOneOutGames + wordMatchGames + tracingGames }
 
     func games(type: GameType, difficulty: Difficulty) -> [Game] {
         games.filter { $0.type == type && $0.difficulty == difficulty }

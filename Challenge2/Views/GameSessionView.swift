@@ -36,6 +36,9 @@ struct GameSessionView: View {
             case .ordering(let model):
                 OrderingGame(game: model, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
+            case .oddOneOut(let model):
+                OddOneOutView(game: model, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
             case .wordMatch(let question):
                 WordMatchView(question: question, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
