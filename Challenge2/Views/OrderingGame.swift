@@ -17,14 +17,19 @@ struct OrderingGame: View {
     // Called when the order is correct. The session decides what happens next.
     let onCorrect: (GameResult) -> Void
 
-    private let tileSpacing: CGFloat = 20
-    private let tilePadding: CGFloat = 20
+    @Environment(\.screenSize) private var screen
+
+    private var tileSpacing: CGFloat { screen.isCompact ? 8 : 20 }
+    private var tilePadding: CGFloat { screen.isCompact ? 8 : 20 }
 
     // As big as the row allows: few items get huge emoji, 5-6 shrink so the row still fits.
-    private func emojiSize(rowWidth: CGFloat) -> CGFloat {
+    // Both the width and the height of the row limit it, so landscape phones don't overflow.
+    private func emojiSize(row: CGSize) -> CGFloat {
         let count = CGFloat(game.elements.count)
-        let tileWidth = (rowWidth - tileSpacing * (count - 1)) / count
-        return min(240, (tileWidth - tilePadding * 2) / 1.25)
+        let tileWidth = (row.width - tileSpacing * (count - 1)) / count
+        let byWidth = (tileWidth - tilePadding * 2) / 1.25
+        let byHeight = (row.height - tilePadding * 2) / 1.25
+        return max(24, min(240, byWidth, byHeight))
     }
 
     var body: some View {
@@ -34,18 +39,18 @@ struct OrderingGame: View {
                     ForEach(game.elements) { element in
                         Text(element.emoji)
                             .padding(tilePadding)
-                            .glassEffect(.regular, in: .rect(cornerRadius: 36))
+                            .glassEffect(.regular, in: .rect(cornerRadius: screen.isCompact ? 20 : 36))
                     }
                     .reorderable()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .font(.system(size: emojiSize(rowWidth: row.size.width)))
+                .font(.system(size: emojiSize(row: row.size)))
                 .reorderContainer(for: OrderingGameItem.self) { difference in
                     game.apply(difference)
                     showTryAgain = false
                 }
             }
-            .frame(height: 340)
+            .frame(height: screen.value(regular: 340, portrait: 160, landscape: 140))
         } footer: {
             VStack(spacing: 12) {
                 Button("Check") {

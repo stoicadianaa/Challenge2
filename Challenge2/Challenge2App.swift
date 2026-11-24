@@ -12,6 +12,7 @@ struct Challenge2App: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView()
+                .providesScreenSize()
         }
     }
 }

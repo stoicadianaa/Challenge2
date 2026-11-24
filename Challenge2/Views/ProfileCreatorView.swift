@@ -15,6 +15,10 @@ struct ProfileCreatorView: View {
     @State private var name = ""
     @State private var avatar = PF.avatars[0]
     @FocusState private var nameFocused: Bool
+    @Environment(\.screenSize) private var screen
+
+    // Eight avatars in one row are wider than a phone, so they wrap onto a second row.
+    private let avatarColumns = [GridItem(.adaptive(minimum: 54), spacing: 10)]
 
     private var trimmedName: String {
         name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -28,14 +32,24 @@ struct ProfileCreatorView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
+        // Hugs its content when there's room; scrolls when the keyboard or a small screen takes it.
+        ScrollIfNeeded { form }
+            .frame(maxWidth: 640)
+            .glassEffect(.regular, in: .rect(cornerRadius: 36))
+            .padding(screen.isCompact ? 12 : 24)
+    }
+
+    private var form: some View {
+        VStack(spacing: screen.isCompact ? 12 : 20) {
             Text("Create your player")
-                .font(.system(size: 34, weight: .heavy, design: .rounded))
+                .font(.system(size: screen.isCompact ? 26 : 34, weight: .heavy, design: .rounded))
                 .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
 
-            AvatarCircle(emoji: avatar, size: 200, ring: PF.orange)
+            AvatarCircle(emoji: avatar, size: screen.value(regular: 200, portrait: 130, landscape: 80), ring: PF.orange)
 
-            HStack(spacing: 10) {
+            LazyVGrid(columns: avatarColumns, spacing: 10) {
                 ForEach(PF.avatars, id: \.self) { emoji in
                 let isSelected = avatar == emoji
 
@@ -56,7 +70,8 @@ struct ProfileCreatorView: View {
             }
 
             TextField("My name is…", text: nameBinding)
-                .font(.system(size: 30, weight: .bold))
+                .font(.system(size: screen.isCompact ? 24 : 30, weight: .bold))
+                .minimumScaleFactor(0.6)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.primary)
                 .textInputAutocapitalization(.words)
@@ -72,8 +87,18 @@ struct ProfileCreatorView: View {
                 )
                 .frame(maxWidth: 420)
 
-            HStack(spacing: 18) {
-                
+            // Side by side when they fit; stacked (still full-size) on a narrow phone.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 18) { buttons }
+                VStack(spacing: 12) { buttons }
+            }
+            .padding(.top, 4)
+        }
+        .padding(screen.isCompact ? 20 : 32)
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
                 Button(role: .destructive, action: onCancel){
                     Label("Cancel", systemImage: "xmark")
                         .font(.title3.weight(.semibold))
@@ -92,13 +117,6 @@ struct ProfileCreatorView: View {
                                 .tint(.green)
                                 .controlSize(.extraLarge)
                                 .disabled(trimmedName.isEmpty)
-            }
-            .padding(.top, 4)
-        }
-        .padding(32)
-                .frame(maxWidth: 640)
-                .glassEffect(.regular, in: .rect(cornerRadius: 36))
-                .padding(24)
     }
 }
 

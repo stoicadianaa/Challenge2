@@ -10,6 +10,7 @@ struct WelcomeView: View {
 
     @State private var floating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.screenSize) private var screen
     @State private var showBubble = false
 
     @State private var viewModel = WelcomeViewModel()
@@ -37,15 +38,17 @@ struct WelcomeView: View {
                 .ignoresSafeArea()
                 .accessibilityHidden(true)
 
-            VStack(spacing: 32) {
-                WelcomeLogo(fontSize: 60)
+            VStack(spacing: screen.isCompact ? 16 : 32) {
+                WelcomeLogo(fontSize: screen.isCompact ? 36 : 60)
 
                 ZStack(alignment: .topTrailing) {
 
                     Image("mascot_genderless_celebrating")
                         .resizable()
                         .scaledToFit()
-                        .containerRelativeFrame(.vertical) { height, _ in height * 0.44 }
+                        .containerRelativeFrame(.vertical) { height, _ in
+                            height * screen.value(regular: 0.44, portrait: 0.3, landscape: 0.38)
+                        }
                         .offset(y: floating ? -12 : 12)
                         .rotationEffect(.degrees(floating ? 2 : -2))
                         .animation(
@@ -56,7 +59,8 @@ struct WelcomeView: View {
                         .accessibilityHidden(true)
 
                     SpeechBubble(text: "Welcome!")
-                        .offset(x: 150, y: -20)
+                        .offset(x: screen.value(regular: 150, portrait: 20, landscape: 130),
+                                y: screen.isPhonePortrait ? -30 : -20)
                         .scaleEffect(showBubble ? 1 : 0.2, anchor: .bottomLeading)
                         .opacity(showBubble ? 1 : 0)
                         .animation(

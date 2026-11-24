@@ -9,6 +9,7 @@ import SwiftUI
 struct WordMatchView: View {
 
     @State private var viewModel: WordMatchViewModel
+    @Environment(\.screenSize) private var screen
 
     // Called when the child finds the word. The session decides what happens next.
     let onCorrect: (GameResult) -> Void
@@ -21,7 +22,7 @@ struct WordMatchView: View {
     var body: some View {
         GameScreen(title: "Find the correct word!", coach: viewModel.coach) {
             // The picture and its answers stay together, so they read as one question.
-            VStack(spacing: 32) {
+            VStack(spacing: screen.isCompact ? 16 : 32) {
                 emojiCard
                 choices
             }
@@ -49,14 +50,22 @@ struct WordMatchView: View {
 
     private var emojiCard: some View {
         Text(viewModel.question.emoji)
-            .font(.system(size: 180))
-            .padding(.horizontal, 64)
-            .padding(.vertical, 28)
-            .glassEffect(.regular, in: .rect(cornerRadius: 48))
+            .font(.system(size: screen.value(regular: 180, portrait: 110, landscape: 80)))
+            .padding(.horizontal, screen.isCompact ? 32 : 64)
+            .padding(.vertical, screen.isCompact ? 14 : 28)
+            .glassEffect(.regular, in: .rect(cornerRadius: screen.isCompact ? 32 : 48))
+    }
+
+    // Stacked on a phone held upright, so each word keeps a big, readable button
+    // instead of three squeezed ones.
+    private var choicesLayout: AnyLayout {
+        screen.isPhonePortrait
+            ? AnyLayout(VStackLayout(spacing: 12))
+            : AnyLayout(HStackLayout(spacing: screen.isCompact ? 12 : 24))
     }
 
     private var choices: some View {
-        HStack(spacing: 24) {
+        choicesLayout {
             ForEach(
                 Array(viewModel.question.choices.enumerated()),
                 id: \.element

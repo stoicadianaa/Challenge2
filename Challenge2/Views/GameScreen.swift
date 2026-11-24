@@ -18,8 +18,10 @@ struct GameScreen<Content: View, Footer: View>: View {
     @ViewBuilder var content: Content
     @ViewBuilder var footer: Footer
 
+    @Environment(\.screenSize) private var screen
+
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: screen.isCompact ? 12 : 24) {
             if expandsContent {
                 InstructionButton(text: title, coach: coach)
                 content.frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -34,8 +36,12 @@ struct GameScreen<Content: View, Footer: View>: View {
                 Spacer()
             }
         }
-        .padding(.horizontal, 32)
-        .padding(.vertical, 16)
+        .padding(.horizontal, screen.isCompact ? 16 : 32)
+        .padding(.vertical, screen.isCompact ? 8 : 16)
+        // On iPad the mascot floats over the empty corner. On an iPhone there is no empty
+        // corner, so the content makes room for it: below it (portrait) or beside it (landscape).
+        .padding(.bottom, screen.isPhonePortrait ? screen.mascotHeight + 16 : 0)
+        .padding(.leading, screen.isPhoneLandscape ? screen.mascotHeight + 24 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .fontDesign(.rounded)
         .background {

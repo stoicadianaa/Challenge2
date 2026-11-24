@@ -34,6 +34,7 @@ struct HomeView: View {
     }
 
     @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
+    @Environment(\.screenSize) private var screen
 
     // VoiceOver already reads the screen, so the spoken welcome would talk over it.
     private func greet(_ action: () -> Void) {
@@ -49,36 +50,55 @@ struct HomeView: View {
         if !viewModel.games(for: type).isEmpty { selectedType = type }
     }
 
+    // Four cards in a row on iPad and iPhone landscape; a 2x2 grid on a phone held upright.
+    @ViewBuilder
+    private var cards: some View {
+        if screen.isPhonePortrait {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
+                categoryCards
+            }
+        } else {
+            HStack(spacing: screen.isCompact ? 12 : 20) {
+                categoryCards
+            }
+        }
+    }
+
+    private var categoryCards: some View {
+        ForEach(GameType.allCases) { game in
+            CategoryCard(game: game) {
+                // Categories without games do nothing when pressed.
+                play(game)
+            }
+        }
+    }
+
+    private var content: some View {
+        VStack(spacing: screen.isCompact ? 12 : 16) {
+
+            Spacer()
+
+            InstructionButton(text: "Welcome to WonderBloom!", speak: homeViewModel.replayGreeting)
+
+            Image("mascot_genderless_happy")
+                .resizable()
+                .scaledToFit()
+                .frame(width: screen.value(regular: 350, portrait: 200, landscape: 110))
+                .accessibilityHidden(true)
+
+            cards
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, screen.isCompact ? 0 : 10)
+
+            Spacer()
+        }
+        .padding()
+    }
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-
-                Spacer()
-                
-                InstructionButton(text: "Welcome to WonderBloom!", speak: homeViewModel.replayGreeting)
-                                
-                Image("mascot_genderless_happy")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 350)
-
-                
-                HStack(spacing: 20) {
-                    ForEach(GameType.allCases) { game in
-                        CategoryCard(game: game) {
-                            // Categories without games do nothing when pressed.
-                            play(game)
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 10)
-                .background(Color.clear)
-                
-                Spacer()
-            }
-            .padding()
-            
+            ScrollIfNeeded { content }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(
                 Image("background")
                     .resizable()

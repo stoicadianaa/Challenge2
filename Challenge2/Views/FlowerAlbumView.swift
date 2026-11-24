@@ -16,8 +16,12 @@ struct FlowerAlbumView: View {
 
     private var flowers: [Flower] { Flower.album(unlocked: unlockedFlowers) }
 
-    // Always 4 cards per row, so the cards are smaller than with an adaptive grid.
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 16), count: 4)
+    @Environment(\.screenSize) private var screen
+
+    // 4 cards per row, but only 2 on a phone held upright, where 4 would be too small to see.
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 16), count: screen.isPhonePortrait ? 2 : 4)
+    }
 
     var body: some View {
         ScrollView {
@@ -28,8 +32,9 @@ struct FlowerAlbumView: View {
                     }
                 }
             }
-            .padding(32)
-            .padding(.bottom, 260)
+            .padding(screen.isCompact ? 16 : 32)
+            // Keeps the last row clear of the floating mascot.
+            .padding(.bottom, screen.value(regular: 260, portrait: screen.mascotHeight + 40, landscape: screen.mascotHeight + 20))
         }
         .scrollIndicators(.hidden)
         .background {
@@ -50,9 +55,11 @@ struct FlowerAlbumView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("My Flower Album")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
+                    .font(.system(size: screen.value(regular: 36, portrait: 22, landscape: 26), weight: .bold, design: .rounded))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.horizontal, screen.isCompact ? 14 : 24)
+                    .padding(.vertical, screen.isCompact ? 6 : 8)
                     .glassEffect(.regular, in: .capsule)
                     .accessibilityAddTraits(.isHeader)
             }
