@@ -22,12 +22,15 @@ struct Game: Identifiable {
         case .tracing(let shape): "tracing:\(shape.title):\(difficulty.name)"
         case .oddOneOut(let model): "oddOneOut:" + model.key
         case .fruitDrag(let model): "fruitDrag:" + model.key
+        case .mathMatch(let question): "mathMatch:" + question.key
         }
     }
 
     var type: GameType {
         switch content {
-        case .ordering, .oddOneOut: .logic
+        case .ordering(let model): model.category
+        case .oddOneOut: .logic
+        case .mathMatch: .numbers
         case .wordMatch, .fruitDrag: .words
         case .tracing: .creativity
         }
@@ -40,4 +43,5 @@ enum GameContent {
     case tracing(TraceShape)
     case oddOneOut(OddOneOutGameModel)
     case fruitDrag(FruitDragGameModel)
+    case mathMatch(MathQuestion)
 }

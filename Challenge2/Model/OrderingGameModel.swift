@@ -11,6 +11,8 @@ import SwiftUI
 struct OrderingGameModel {
     let title: String
     var elements: [OrderingGameItem]
+    // Which category the game belongs to: number games reuse this template under Numbers.
+    var category: GameType = .logic
     
     var isInCorrectOrder: Bool {
         elements.map(\.order) == elements.map(\.order).sorted()

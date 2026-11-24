@@ -42,6 +42,9 @@ struct GameSessionView: View {
             case .fruitDrag(let model):
                 FruitDragView(game: model, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
+            case .mathMatch(let question):
+                MathMatchView(question: question, onCorrect: viewModel.gameCompleted)
+                    .id(game.id)
             case .wordMatch(let question):
                 WordMatchView(question: question, onCorrect: viewModel.gameCompleted)
                     .id(game.id)
