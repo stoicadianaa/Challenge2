@@ -54,6 +54,12 @@ class GardenViewModel {
         return next.minDrops - plantDrops
     }
 
+    var mascot: Mascot {
+        if stage == .flower { return .celebrating }
+        if availableDrops == 0 { return .sad }
+        return .happy
+    }
+
     var mascotImage: String {
         if stage == .flower { return "mascot_genderless_celebrating" }
         if availableDrops == 0 { return "mascot_genderless_sad" }

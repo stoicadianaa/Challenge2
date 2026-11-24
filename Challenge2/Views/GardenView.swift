@@ -10,6 +10,13 @@ import SwiftUI
 struct GardenView: View {
 
     @State private var viewModel: GardenViewModel
+    // Tapping the mascot here talks about the plant, not about a game.
+    @State private var coach = MascotCoach(mascot: Mascot.happy.saying([
+        "Water your plant to help it grow!",
+        "Every drop helps your flower bloom!",
+        "Play games to win more water drops!",
+        "Look how much it has grown!",
+    ]))
 
     init(
         waterDrops: Int, plantDrops: Int, unlockedFlowers: [String],
@@ -39,11 +46,8 @@ struct GardenView: View {
                 Spacer()
 
                 HStack(alignment: .bottom) {
-                    Image(viewModel.mascotImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 250)
-                        .accessibilityHidden(true)
+                    // Room for the mascot, which floats above the screen (see mascotOverlay).
+                    Color.clear.frame(width: 250, height: 1)
 
                     Spacer()
 
@@ -62,6 +66,15 @@ struct GardenView: View {
                     .scaledToFill()
                     .ignoresSafeArea()
             )
+            .mascotOverlay(coach, mascot: viewModel.mascot)
+            .task {
+                // Say what matters right now; a happy plant needs no extra words.
+                if viewModel.stage == .flower {
+                    coach.say("Your flower bloomed! Plant a new seed!")
+                } else if viewModel.availableDrops == 0 {
+                    coach.say("No drops left! Play games to win more!")
+                }
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

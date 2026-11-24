@@ -4,6 +4,14 @@ struct FlowerAlbumView: View {
     // imageName of the flowers the child has unlocked.
     let unlockedFlowers: [String]
 
+    // Tapping the mascot here talks about flowers, not about a game.
+    @State private var coach = MascotCoach(mascot: Mascot.happy.saying([
+        "Look how pretty they are!",
+        "Which flower is your favorite?",
+        "Keep playing to find more flowers!",
+        "Every flower grows from a little seed!",
+    ]))
+
     private var isComplete: Bool { unlockedFlowers.count >= Flower.catalog.count }
 
     private var flowers: [Flower] { Flower.album(unlocked: unlockedFlowers) }
@@ -31,21 +39,11 @@ struct FlowerAlbumView: View {
                         .ignoresSafeArea()
                         .accessibilityHidden(true)
         }
-        .overlay(alignment: .bottomTrailing) {
-            VStack(alignment: .trailing, spacing: -6) {
-                AlbumSpeechBubble(
-                    text: isComplete
-                        ? "You found all the flowers!"
-                        : "Play more games to unlock new flowers!")
-                
-                Image(isComplete ? "mascot_genderless_celebrating" : "mascot_genderless_happy")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 170)
-            }
-            .padding(.trailing, 24)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+        .mascotOverlay(coach, mascot: isComplete ? .celebrating : .happy)
+        .task {
+            coach.say(isComplete
+                ? "You found all the flowers!"
+                : "Play more games to unlock new flowers!")
         }
         .navigationTitle("My Flower Album")
         .toolbarTitleDisplayMode(.inline)
@@ -59,49 +57,6 @@ struct FlowerAlbumView: View {
                     .accessibilityAddTraits(.isHeader)
             }
         }
-    }
-}
-
-private struct TailBubbleShape: Shape {
-    var cornerRadius: CGFloat = 28
-    var tailSize: CGFloat = 20
-    var tailInset: CGFloat = 70
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-
-        let body = CGRect(x: rect.minX, y: rect.minY,
-                          width: rect.width, height: rect.height - tailSize)
-        path.addRoundedRect(in: body,
-                            cornerSize: CGSize(width: cornerRadius, height: cornerRadius),
-                            style: .continuous)
-
-        let tipX = rect.maxX - tailInset
-        var tail = Path()
-        tail.move(to: CGPoint(x: tipX - tailSize, y: body.maxY - 1))
-        tail.addLine(to: CGPoint(x: tipX + tailSize * 0.2, y: rect.maxY))
-        tail.addLine(to: CGPoint(x: tipX + tailSize, y: body.maxY - 1))
-        tail.closeSubpath()
-
-        path.addPath(tail)
-        return path
-    }
-}
-
-private struct AlbumSpeechBubble: View {
-    let text: String
-    private let tailSize: CGFloat = 20
-
-    var body: some View {
-        Text(text)
-            .font(.system(.title3, design: .rounded, weight: .semibold))
-            .foregroundStyle(.primary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 24)
-            .padding(.top, 14)
-            .padding(.bottom, 14 + tailSize) 
-            .frame(maxWidth: 300)
-            .glassEffect(.regular, in: TailBubbleShape(tailSize: tailSize))
     }
 }
 

@@ -46,9 +46,10 @@ struct MascotView: View {
 
 extension View {
     /// Puts the coach's mascot in the one place every game screen uses: bottom-left, same size.
-    func mascotOverlay(_ coach: MascotCoach) -> some View {
+    /// Pass `mascot` when the face changes with the screen's state (e.g. happy / sad).
+    func mascotOverlay(_ coach: MascotCoach, mascot: Mascot? = nil) -> some View {
         overlay(alignment: .bottomLeading) {
-            MascotView(mascot: coach.mascot, message: coach.line) {
+            MascotView(mascot: mascot ?? coach.mascot, message: coach.line) {
                 coach.encourage()
             }
         }
