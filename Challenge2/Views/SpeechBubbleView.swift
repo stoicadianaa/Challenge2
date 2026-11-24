@@ -32,8 +32,7 @@ struct BubbleShape: Shape {
     }
 }
 
-/// The speech bubble shared by the welcome and reward screens.
-/// Pass any content, or use `SpeechBubble(text:)` for the plain-text look.
+// Pass any content, or use `SpeechBubble(text:)` for the plain-text look.
 struct SpeechBubble<Content: View>: View {
     private let tailSize: CGFloat = 22
     private let content: Content
