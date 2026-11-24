@@ -18,6 +18,14 @@ struct SkillProgress: Codable, Equatable {
     /// Stable keys of recently played games, so the same one isn't served twice in a row.
     var recentlyPlayed: [String] = []
 
+    /// 0...1 from the start of Easy to Hard. Easy and Medium each fill half the bar, with
+    /// the win streak filling in toward the next level. Hard is the top, so it's always full.
+    var levelCompletion: Double {
+        guard level < Difficulty.allCases.last! else { return 1 }
+        let streakShare = Double(winStreak) / Double(Self.winsToLevelUp)
+        return (Double(level.rawValue) + streakShare) / Double(Difficulty.allCases.count - 1)
+    }
+
     /// Remembers a game as the most recently played. Each key appears once.
     mutating func markPlayed(_ key: String) {
         recentlyPlayed.removeAll { $0 == key }
